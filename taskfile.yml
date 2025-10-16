@@ -1,0 +1,29 @@
+version: '3'
+
+env:
+  MYENV: 'myenv'
+
+dotenv: ['.env.sample']
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+  hello:
+    cmds:
+      - echo 'Hello World from Task!'
+    silent: true
+  globalenv:
+    cmds:
+      - echo $MYENV
+    silent: true
+  localenv:
+    cmds:
+      - echo $MYENV
+    silent: true
+    env:
+      MYENV: 'localenv'
+  dotenv:
+    cmds:
+      - echo $ENDPOINT
+    silent: true
