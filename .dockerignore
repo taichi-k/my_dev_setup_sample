@@ -1,0 +1,6 @@
+# 一般的な除外ルール
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
