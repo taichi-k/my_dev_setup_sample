@@ -10,7 +10,7 @@ app = FastAPI(title="FastAPI + Postgres + uv Starter")
 
 
 @app.get("/health")
-async def health(session: AsyncSession = Depends(get_session)):
+async def health(session: AsyncSession = Depends(get_session)) -> dict:
     # DB 接続の簡易確認
     row = await session.execute(text("SELECT version()"))
     version = row.scalar_one()
@@ -18,5 +18,5 @@ async def health(session: AsyncSession = Depends(get_session)):
 
 
 @app.get("/")
-async def root():
+async def root() -> dict:
     return {"message": "hello from FastAPI on Dev Container!"}
