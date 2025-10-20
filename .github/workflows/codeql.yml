@@ -1,0 +1,9 @@
+name: CodeQL
+on:
+  push: { branches: [main] }
+  pull_request:
+  schedule:
+    - cron: '0 18 * * 1'  # 毎週月曜 03:00 JST
+jobs:
+  analyze:
+    uses: github/codeql-action/.github/workflows/codeql.yml@v3
