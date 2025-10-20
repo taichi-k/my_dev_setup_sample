@@ -21,18 +21,12 @@ jobs:
         if: matrix.lang == 'python'
         with: { python-version: '3.12' }
 
-      - uses: actions/cache@v4
-        if: matrix.lang == 'python'
-        with:
-          path: ~/.cache/uv
-          key: uv-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
-          restore-keys: uv-${{ runner.os }}-
-
       - name: Install uv
         if: matrix.lang == 'python'
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
+          enable-cache: true
       - name: Python lint+type+test
         if: matrix.lang == 'python'
         run: |
