@@ -36,6 +36,13 @@ python_version = "3.12"
 check_untyped_defs = true
 disallow_untyped_defs = true
 
+[tool.pytest.ini_options]
+pythonpath = ["./src"]
+testpaths = ["./src/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
 
 [tool.uv]
 # uv の設定（任意）。インストール先 .venv をプロジェクトローカルに固定
