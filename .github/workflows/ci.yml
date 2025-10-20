@@ -1,0 +1,43 @@
+# .github/workflows/ci.yml
+name: CI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: [python]  # 使う言語だけ残す
+    steps:
+      - uses: actions/checkout@v4
+
+      # 言語ごとのセットアップ例（必要なものだけ残す）
+      - uses: actions/setup-python@v5
+        if: matrix.lang == 'python'
+        with: { python-version: '3.12' }
+
+      - uses: actions/cache@v4
+        if: matrix.lang == 'python'
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: uv-${{ runner.os }}-
+
+      - name: Install uv
+        if: matrix.lang == 'python'
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+      - name: Python lint+type+test
+        if: matrix.lang == 'python'
+        run: |
+          uv sync --dev
+          uv run ruff check .
+          uv add --dev mypy
+          uv run mypy .
+          uv run pytest -q --maxfail=1 --disable-warnings
