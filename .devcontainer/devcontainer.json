@@ -5,6 +5,9 @@
   "service": "app",
   "updateRemoteUserUID": true,
   "workspaceFolder": "/workspace",
+  "runServices": [
+    "nginx"
+  ],
   "features": {
     "ghcr.io/devcontainers/features/go:1": {},
     "ghcr.io/devcontainers/features/python:1": {},
@@ -12,7 +15,7 @@
     // "ghcr.io/itsmechlark/features/postgresql:1": {}
   },
   // "forwardPorts": [],
-  "postCreateCommand": "/bin/bash -lc 'uv sync --group dev && export PATH=.venv/bin:$PATH && pre-commit install'",
+  "postCreateCommand": "uv sync --group dev && export PATH=.venv/bin:$PATH && pre-commit install",
   "customizations": {
     "vscode": {
       "extensions": [

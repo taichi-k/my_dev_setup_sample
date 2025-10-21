@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to your application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .status {
+            background-color: #e7f5e7;
+            border: 1px solid #c3e6c3;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>アプリケーションへようこそ</h1>
+        <div class="status">
+            <p>✅ Nginx が正常に動作しています</p>
+            <p>🐘 PostgreSQL データベースが利用可能です</p>
+            <p>📦 Redis キャッシュサーバーが利用可能です</p>
+        </div>
+        <p>このページは Nginx によって配信されています。アプリケーションの API エンドポイントへのリクエストは自動的にバックエンドサービスにプロキシされます。</p>
+    </div>
+</body>
+
+</html>
