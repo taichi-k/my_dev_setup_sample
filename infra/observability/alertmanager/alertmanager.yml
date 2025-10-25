@@ -1,0 +1,12 @@
+route:
+  receiver: dev-null
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 4h
+
+receivers:
+  - name: dev-null
+    # 学習中は通知捨てる。実運用は Slack/Webhook/Email を設定
+    # slack_configs:
+    #   - api_url: https://hooks.slack.com/services/XXX/YYY/ZZZ
+    #     channel: '#alerts'

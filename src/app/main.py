@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 from fastapi import Depends, FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db import get_session
 
 app = FastAPI(title="FastAPI + Postgres + uv Starter")
+
+Instrumentator().instrument(app).expose(
+    app,
+    endpoint="/metrics",  # 変えたければ /_metrics など
+    include_in_schema=False,
+)
 
 
 @app.get("/health")

@@ -1,0 +1,18 @@
+groups:
+  - name: basics
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "Target down"
+          description: "{{ $labels.job }} {{ $labels.instance }} is down."
+
+      # 例：FastAPI の 500 率（Instrumentator を入れたら http_server_requests などで設計）
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "High 5xx"
