@@ -1,5 +1,9 @@
 version: '3'
 
+vars:
+  COMPOSE_FILES: "-f docker-compose.yml -f docker-compose.obs.yml"
+  OBS_SERVICES: grafana prometheus loki alertmanager nginx-exporter promtail
+
 env:
   MYENV: 'myenv'
 
@@ -9,10 +13,6 @@ tasks:
   default:
     cmds:
       - task --list-all
-  hello:
-    cmds:
-      - echo 'Hello World from Task!'
-    silent: true
   globalenv:
     cmds:
       - echo $MYENV
@@ -27,6 +27,28 @@ tasks:
     cmds:
       - echo $ENDPOINT
     silent: true
-  run:
+  up:
     cmds:
-      - uv run uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8000
+      - docker compose {{.COMPOSE_FILES}} up -d --build --no-recreate
+  down:
+    desc: "Bring down all containers but keep volumes"
+    cmds:
+      - docker compose {{.COMPOSE_FILES}} down --timeout 5 --remove-orphans
+  down:v:
+    desc: "Bring down all containers and remove volumes"
+    cmds:
+      - docker compose {{.COMPOSE_FILES}} down -v --timeout 5 --remove-orphans
+  up:obs:
+    cmds:
+      - docker compose {{.COMPOSE_FILES}} up -d --no-recreate {{.OBS_SERVICES}}
+  down:obs:
+    desc: "Stop only observability stack (Grafana/Prometheus/Loki/Alertmanager...)"
+    cmds:
+      - docker compose {{.COMPOSE_FILES}} stop {{.OBS_SERVICES}}
+      - docker compose {{.COMPOSE_FILES}} rm -f {{.OBS_SERVICES}}
+  fix:prom_permission:
+    desc: "Fix Prometheus data directory permission"
+    cmds:
+      - task down:obs
+      - docker run --rm -v my_dev_setup_sample_prom-data:/prom busybox sh -c 'chown -R 65534:65534 /prom'
+      - task up:obs

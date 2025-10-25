@@ -1,0 +1,68 @@
+version: '3.8'
+services:
+  grafana:
+    image: grafana/grafana:11.2.0
+    profiles: [ "obs" ]
+    ports:
+      - "3001:3000" # 必要なときだけ公開。不要なら消す
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+      - loki
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: [ "obs" ]
+    command: [ "--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prom" ]
+    ports:
+      - "9090:9090" # 学習用に開ける。常時は不要なら消す
+    volumes:
+      - ./infra/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prom
+    depends_on: [ alertmanager ]
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    profiles: [ "obs" ]
+    command: [ "--config.file=/etc/alertmanager/alertmanager.yml" ]
+    ports: [ "9093:9093" ]
+    volumes:
+      - ./infra/observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+
+  loki:
+    image: grafana/loki:2.9.8
+    profiles: [ "obs" ]
+    command: [ "-config.file=/etc/loki/loki-config.yml" ]
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./infra/observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    # Nginx メトリクス用（stub_status を http://nginx:80/nginx_status で公開しておく）
+  nginx-exporter:
+    image: ghcr.io/nginxinc/nginx-prometheus-exporter:latest
+    profiles: [ "obs" ]
+    command: [ "-nginx.scrape-uri=http://nginx/nginx_status" ]
+    ports: [ "9113:9113" ] # Prometheus が拾う
+    depends_on: [ nginx ]
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    profiles: [ "obs" ]
+    command: [ "-config.file=/etc/promtail/promtail-config.yml" ]
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./infra/observability/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - promtail-positions:/positions
+    depends_on:
+      - loki
+
+volumes:
+  grafana-data:
+  prom-data:
+  loki-data:
+  promtail-positions: {}
