@@ -27,6 +27,12 @@ tasks:
     cmds:
       - echo $ENDPOINT
     silent: true
+  setup:
+    desc: "Setup tools"
+    cmds:
+      - brew install uv
+      - uv sync --group dev
+      - pre-commit install
   up:
     cmds:
       - docker compose {{.COMPOSE_FILES}} up -d --build --no-recreate
