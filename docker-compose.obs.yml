@@ -39,7 +39,7 @@ services:
       - "3100:3100"
     volumes:
       - ./infra/observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
-      - loki-data:/loki
+      # - loki-data:/loki
     # Nginx メトリクス用（stub_status を http://nginx:80/nginx_status で公開しておく）
   nginx-exporter:
     image: ghcr.io/nginxinc/nginx-prometheus-exporter:latest
@@ -64,5 +64,5 @@ services:
 volumes:
   grafana-data:
   prom-data:
-  loki-data:
+  # loki-data:
   promtail-positions: {}
