@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 
 import sentry_sdk
@@ -9,11 +10,13 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db import get_session
+from .logging_conf import setup_logging
+
+setup_logging()
+log = logging.getLogger("app")
 
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN", ""),
-    # Add data like request headers and IP for users,
-    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
     send_default_pii=True,
     traces_sample_rate=1.0,
     enable_logs=True,
@@ -36,8 +39,23 @@ async def health(session: AsyncSession = Depends(get_session)) -> dict:
     return {"ok": True, "db_version": version}
 
 
+@app.get("/error_log")
+async def error_log() -> dict:
+    try:
+        division_by_zero = 1 / 0
+    except ZeroDivisionError as e:
+        log.error(
+            "An error occurred",
+            exc_info=e,
+            extra={"extra": {"service": "app", "event": "error_log"}},
+        )
+        return {"message": "Error logged"}
+    return {"message": division_by_zero}
+
+
 @app.get("/")
 async def root() -> dict:
+    log.info("Root endpoint accessed", extra={"extra": {"service": "app", "event": "root_access"}})
     return {"message": "hello from FastAPI on Dev Container!"}
 
 
@@ -52,6 +70,7 @@ async def log_messages():
     sentry_sdk.logger.info("This is an info log message")
     sentry_sdk.logger.warning("This is a warning message")
     sentry_sdk.logger.error("This is an error message")
+    return {"message": "Logged messages to Sentry"}
 
 
 @app.get("/sleep")
