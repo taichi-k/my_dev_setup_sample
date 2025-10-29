@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .db import get_session
 from .logging_conf import setup_logging
+from .middleware_config import setup_middlewares
 
 setup_logging()
 log = logging.getLogger("app")
@@ -23,6 +24,9 @@ sentry_sdk.init(
 )
 
 app = FastAPI(title="FastAPI + Postgres + uv Starter")
+
+# middlewareの設定
+setup_middlewares(app)
 
 Instrumentator().instrument(app).expose(
     app,

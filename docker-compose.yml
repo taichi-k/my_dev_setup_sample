@@ -12,6 +12,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    labels:                             # ← ここ大事：ラベルをLokiラベルに昇格させる
+      - "obs.service=app"
+      - "obs.project=myproj"
+      - "obs.env=dev"
 
   db:
     init: true

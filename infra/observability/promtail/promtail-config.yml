@@ -14,30 +14,42 @@ scrape_configs:
       - host: unix:///var/run/docker.sock
         refresh_interval: 5s
     relabel_configs:
-      - source_labels: ["__meta_docker_container_id"]
-        target_label: "__path__"
-        replacement: /var/lib/docker/containers/$1/$1-json.log
-      - source_labels: ["__meta_docker_container_name"]
-        target_label: "container"
-      - source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
-        target_label: "service"
-      - source_labels: ["__meta_docker_container_label_com_docker_compose_project"]
-        target_label: "compose_project"
-      - source_labels: ["__meta_docker_container_label_com_docker_compose_container_number"]
-        target_label: "compose_number"
-      - source_labels: ["__meta_docker_container_label_maintainer"]
-        target_label: "maintainer"
-      - source_labels: ["__meta_docker_container_log_stream"]
-        target_label: "logstream"
+      # 読み込むログファイルパスへ変換
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: stream
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: container
+      # compose サービス名（あれば）
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: compose_service
+      # 任意に付けた obs.* ラベル → Lokiラベル化
+      - source_labels: ['__meta_docker_container_label_obs_service']
+        target_label: service
+      - source_labels: ['__meta_docker_container_label_obs_project']
+        target_label: project
+      - source_labels: ['__meta_docker_container_label_obs_env']
+        target_label: env
+
+      # 高カーディナリティ回避: container_id などは落とす
+      - action: labeldrop
+        regex: (id|image|name|__meta.*)
     pipeline_stages:
-      # Dockerの json-file 形式を解釈（time/log/stream を展開）
       - docker: {}
-      # 好みでJSONログをパースしたければ
-      # - json:
-      #     expressions:
-      #       level: level
-      #       msg: message
-      # - labels:
-      #     level:
-      # - output:
-      #     source: msg
+      - json:
+          expressions:
+            level: level
+            logger: logger
+            msg: msg
+            type: type
+            method: method
+            path: path
+            status: status
+            latency_ms: latency_ms
+      - labels:
+          level:
+          type:
+          service:
+          env:
+          method:
+          status:
