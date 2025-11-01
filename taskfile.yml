@@ -2,12 +2,12 @@ version: '3'
 
 vars:
   COMPOSE_FILES: "-f docker-compose.yml -f docker-compose.obs.yml"
-  OBS_SERVICES: grafana prometheus loki alertmanager nginx-exporter promtail
+  OBS_SERVICES: grafana prometheus loki alertmanager nginx-exporter tempo otel-collector
 
 env:
   MYENV: 'myenv'
 
-dotenv: ['.env.sample']
+dotenv: ['.env']
 
 tasks:
   default:
@@ -36,6 +36,10 @@ tasks:
   up:
     cmds:
       - docker compose {{.COMPOSE_FILES}} up -d --build --no-recreate
+  build:
+    desc: "Build all containers"
+    cmds:
+      - docker compose {{.COMPOSE_FILES}} build --no-cache
   down:
     desc: "Bring down all containers but keep volumes"
     cmds:

@@ -4,7 +4,7 @@ services:
     image: grafana/grafana:11.2.0
     profiles: [ "obs" ]
     ports:
-      - "3001:3000" # 必要なときだけ公開。不要なら消す
+      - "3001:3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -17,7 +17,7 @@ services:
     profiles: [ "obs" ]
     command: [ "--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prom" ]
     ports:
-      - "9090:9090" # 学習用に開ける。常時は不要なら消す
+      - "9090:9090"
     volumes:
       - ./infra/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prom-data:/prom
@@ -32,7 +32,7 @@ services:
       - ./infra/observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
 
   loki:
-    image: grafana/loki:2.9.8
+    image: grafana/loki:latest
     profiles: [ "obs" ]
     command: [ "-config.file=/etc/loki/loki-config.yml" ]
     ports:
@@ -40,29 +40,44 @@ services:
     volumes:
       - ./infra/observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       # - loki-data:/loki
-    # Nginx メトリクス用（stub_status を http://nginx:80/nginx_status で公開しておく）
+
+  tempo:
+    image: grafana/tempo:2.3.0
+    profiles: [ "obs" ]
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./infra/observability/tempo/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    ports:
+      - "3200:3200"   # HTTP
+      - "14268:14268" # Jaeger ingest
+      - "4327:4317"   # OTLP gRPC (changed external port to avoid conflict)
+      - "4328:4318"   # OTLP HTTP (changed external port to avoid conflict)
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.89.0
+    profiles: [ "obs" ]
+    command: [ "--config=/etc/otelcol-contrib/otel-collector.yaml" ]
+    volumes:
+      - ./infra/observability/otel/otel-collector.yaml:/etc/otelcol-contrib/otel-collector.yaml:ro
+    ports:
+      - "4319:4317"   # OTLP gRPC receiver (changed port to avoid conflict)
+      - "4320:4318"   # OTLP HTTP receiver (changed port to avoid conflict)
+      - "8889:8888"   # Prometheus metrics
+    depends_on:
+      - tempo
+      - loki
+      - prometheus
+
   nginx-exporter:
     image: ghcr.io/nginxinc/nginx-prometheus-exporter:latest
     profiles: [ "obs" ]
     command: [ "-nginx.scrape-uri=http://nginx/nginx_status" ]
-    ports: [ "9113:9113" ] # Prometheus が拾う
+    ports: [ "9113:9113" ]
     depends_on: [ nginx ]
-
-  promtail:
-    image: grafana/promtail:2.9.8
-    profiles: [ "obs" ]
-    command: [ "-config.file=/etc/promtail/promtail-config.yml" ]
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/log:/var/log:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./infra/observability/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
-      - promtail-positions:/positions
-    depends_on:
-      - loki
 
 volumes:
   grafana-data:
-  prom-data:
+  # prom-data:
   # loki-data:
-  promtail-positions: {}
+  tempo-data:
