@@ -80,4 +80,4 @@ volumes:
   grafana-data:
   # prom-data:
   # loki-data:
-  tempo-data:
+  # tempo-data:
