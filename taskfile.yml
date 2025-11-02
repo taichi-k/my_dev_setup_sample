@@ -62,9 +62,9 @@ tasks:
       - task down:obs
       - docker run --rm -v my_dev_setup_sample_prom-data:/prom busybox sh -c 'chown -R 65534:65534 /prom'
       - task up:obs
-  create:kibanauser:
+  setup:espasswords:
     desc: "Create Kibana user in Elasticsearch"
     cmds:
       - |
-        docker exec -it $(docker compose {{.COMPOSE_FILES}} ps -q elasticsearch) \
-        bin/elasticsearch-users useradd kibana_system -p ${KIBANA_SYSTEM_PASSWORD} -r kibana_system
+        docker compose exec -it elasticsearch \
+        bin/elasticsearch-setup-passwords interactive
