@@ -1,0 +1,6 @@
+from app.domain.users.user import User
+
+
+class UsersRepository:
+    def save(self, user: User): ...
+    def find_by_username(self, username: str): ...

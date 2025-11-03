@@ -1,0 +1,15 @@
+import re
+from dataclasses import dataclass
+
+from app.domain.errors import ValidationFailed
+
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+@dataclass(frozen=True)
+class Email:
+    value: str
+
+    def __post_init__(self):
+        if not (EMAIL_RE.match(self.value)):
+            raise ValidationFailed(field="Email", reason="Invalid email address")

@@ -21,11 +21,11 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .api import debug
 from .core.logging_conf import setup_logging
 from .db import get_session
 from .middleware.middleware_config import setup_middlewares
 from .observability.sentry import setup_sentry
+from .presentation.controllers import debug, users_controller
 
 setup_logging()
 log = logging.getLogger("app")
@@ -76,6 +76,7 @@ log.addHandler(otel_handler)
 
 app = FastAPI(title="FastAPI + Postgres + uv Starter")
 app.include_router(debug.router, prefix="/api/debug", tags=["debug"])
+app.include_router(users_controller.router, prefix="/user", tags=["user"])
 
 setup_middlewares(app)
 
@@ -118,4 +119,4 @@ async def health(session: AsyncSession = Depends(get_session)) -> dict:
 @app.get("/")
 async def root() -> dict:
     log.info("Root endpoint accessed", extra={"extra": {"service": "app", "event": "root_access"}})
-    return {"message": "hello from FastAPI on Dev Container!"}
+    return {"message": "Hello from FastAPI on Dev Container!"}

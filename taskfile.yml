@@ -72,3 +72,7 @@ tasks:
     desc: "Restart only the app service"
     cmds:
       - docker compose restart app
+  test:
+    desc: "Run tests"
+    cmds:
+      - OTEL_SDK_DISABLED=true uv run pytest --tb=short --disable-warnings
