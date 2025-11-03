@@ -21,9 +21,10 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .api import debug
+from .core.logging_conf import setup_logging
 from .db import get_session
-from .logging_conf import setup_logging
-from .middleware_config import setup_middlewares
+from .middleware.middleware_config import setup_middlewares
 from .observability.sentry import setup_sentry
 
 setup_logging()
@@ -50,6 +51,14 @@ metric_reader = PeriodicExportingMetricReader(
 meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
 metrics.set_meter_provider(meter_provider)  # ← 追加
 
+meter = metrics.get_meter("app.http")
+req_counter = meter.create_counter(
+    "http_requests_total", description="Total number of HTTP requests"
+)
+req_latency = meter.create_histogram(
+    "http_request_duration_seconds", description="HTTP request duration in seconds"
+)
+
 tracer_provider = TracerProvider(resource=resource)
 tracer_provider.add_span_processor(
     BatchSpanProcessor(OTLPSpanExporter(endpoint=OTLP_ENDPOINT, insecure=True))
@@ -66,17 +75,9 @@ otel_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provide
 log.addHandler(otel_handler)
 
 app = FastAPI(title="FastAPI + Postgres + uv Starter")
+app.include_router(debug.router, prefix="/api/debug", tags=["debug"])
 
 setup_middlewares(app)
-
-
-meter = metrics.get_meter("app.http")
-req_counter = meter.create_counter(
-    "http_requests_total", description="Total number of HTTP requests"
-)
-req_latency = meter.create_histogram(
-    "http_request_duration_seconds", description="HTTP request duration in seconds"
-)
 
 
 @app.middleware("http")
@@ -114,35 +115,7 @@ async def health(session: AsyncSession = Depends(get_session)) -> dict:
     return {"ok": True, "db_version": version}
 
 
-@app.get("/error_log")
-async def error_log() -> dict:
-    try:
-        division_by_zero = 1 / 0
-    except ZeroDivisionError as e:
-        log.error(
-            "An error occurred",
-            exc_info=e,
-            extra={"extra": {"service": "app", "event": "error_log"}},
-        )
-        return {"message": "Error logged"}
-    return {"message": division_by_zero}
-
-
 @app.get("/")
 async def root() -> dict:
     log.info("Root endpoint accessed", extra={"extra": {"service": "app", "event": "root_access"}})
     return {"message": "hello from FastAPI on Dev Container!"}
-
-
-@app.get("/sentry-debug")
-async def trigger_error():
-    division_by_zero = 1 / 0
-    return {"result": division_by_zero}
-
-
-@app.get("/sleep")
-async def sleep_endpoint():
-    import asyncio
-
-    await asyncio.sleep(5)
-    return {"message": "Slept for 5 seconds"}
