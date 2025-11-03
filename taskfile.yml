@@ -68,3 +68,7 @@ tasks:
       - |
         docker compose exec -it elasticsearch \
         bin/elasticsearch-setup-passwords interactive
+  restart:app:
+    desc: "Restart only the app service"
+    cmds:
+      - docker compose restart app
