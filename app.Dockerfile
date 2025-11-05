@@ -21,4 +21,4 @@ COPY . .
 
 RUN uv run pre-commit install
 
-CMD ["uv", "run", "uvicorn", "src.app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+CMD ["uv", "run", "uvicorn", "app.main:app", "--app-dir", "src", "--reload", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

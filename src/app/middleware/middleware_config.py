@@ -5,7 +5,7 @@ Middleware設定ファイル
 
 from fastapi import FastAPI
 
-from . import access_log_middleware
+from app.middleware.access_log import access_log_middleware
 
 
 def setup_middlewares(app: FastAPI) -> None:

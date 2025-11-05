@@ -2,10 +2,11 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ...application.users.users_service import UsersService
-from ...infra.users.mock_users_repository import MockUsersRepository
-from ..dto.users_request import CreateUserRequest
-from ..dto.users_response import CreateUserResponse, GetUserResponse
+from app.application.users.users_service import UsersService
+from app.domain.common.email import Email
+from app.infra.users.mock_users_repository import MockUsersRepository
+from app.presentation.dto.users_request import CreateUserRequest
+from app.presentation.dto.users_response import CreateUserResponse, GetUserResponse
 
 router = APIRouter()
 log = logging.getLogger("app")
@@ -15,7 +16,9 @@ users_service = UsersService(repo=MockUsersRepository())
 
 @router.post("/create")
 async def create_user(request: CreateUserRequest) -> CreateUserResponse:
-    res = users_service.create_user(username=request.username, age=request.age, email=request.email)
+    res = users_service.create_user(
+        username=request.username, age=request.age, email=Email(request.email)
+    )
     if res:
         log.info(f"User created: {request.username}")
         return CreateUserResponse(result="ok")

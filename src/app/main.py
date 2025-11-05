@@ -21,11 +21,11 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .core.logging_conf import setup_logging
-from .db import get_session
-from .middleware.middleware_config import setup_middlewares
-from .observability.sentry import setup_sentry
-from .presentation.controllers import debug, users_controller
+from app.core.logging_conf import setup_logging
+from app.db import get_session
+from app.middleware.middleware_config import setup_middlewares
+from app.observability.sentry import setup_sentry
+from app.presentation.controllers import debug, users_controller
 
 setup_logging()
 log = logging.getLogger("app")
