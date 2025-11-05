@@ -26,6 +26,7 @@ dependencies = [
     "opentelemetry-instrumentation-psycopg2",
     "opentelemetry-instrumentation-redis",
     "opentelemetry-instrumentation-sqlalchemy>=0.59b0",
+    "alembic>=1.17.1",
 ]
 
 
