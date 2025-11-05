@@ -27,6 +27,7 @@ dependencies = [
     "opentelemetry-instrumentation-redis",
     "opentelemetry-instrumentation-sqlalchemy>=0.59b0",
     "alembic>=1.17.1",
+    "greenlet>=3.2.4",
 ]
 
 
