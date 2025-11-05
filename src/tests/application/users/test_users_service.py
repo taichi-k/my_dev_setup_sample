@@ -4,7 +4,7 @@ from app.application.users.users_service import UsersService
 from app.domain.common.email import Email
 from app.domain.errors import Conflict
 from app.domain.users.user import User
-from app.infra.users.mock_users_repository import MockUsersRepository
+from app.infra.repositories.mock_users_repository import MockUsersRepository
 
 
 def test_create_user_succeed():
