@@ -1,8 +1,3 @@
-"""
-Middleware設定ファイル
-アプリケーションで使用するmiddlewareの設定と登録を管理
-"""
-
 from fastapi import FastAPI
 
 from app.middleware.access_log import access_log_middleware
