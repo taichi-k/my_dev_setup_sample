@@ -10,6 +10,6 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 class Email:
     value: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not (EMAIL_RE.match(self.value)):
             raise ValidationFailed(field="Email", reason="Invalid email address")

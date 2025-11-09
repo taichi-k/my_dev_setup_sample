@@ -5,7 +5,7 @@ from app.domain.users.user import User, UserAge
 
 
 class MockUsersRepository(UsersRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         self.users = [User(username="default", age=UserAge(30), email=Email("default@example.com"))]
 
     async def save(self, user: User) -> None:

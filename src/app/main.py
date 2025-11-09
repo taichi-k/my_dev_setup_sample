@@ -81,7 +81,7 @@ setup_middlewares(app)
 
 
 @app.middleware("http")
-async def metrics_middleware(request, call_next):
+async def metrics_middleware(request, call_next) -> None:
     import time
 
     start = time.perf_counter()

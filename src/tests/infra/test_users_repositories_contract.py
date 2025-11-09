@@ -1,13 +1,16 @@
+from typing import Callable
+
 import pytest
 
 from app.domain.common.email import Email
 from app.domain.errors import Conflict
+from app.domain.users.repository import UsersRepository
 from app.domain.users.user import User
 from app.domain.users.user_age import UserAge
 from app.infra.repositories.mock_users_repository import MockUsersRepository
 
 
-async def repo_contract(factory):
+async def repo_contract(factory: Callable[[], UsersRepository]) -> None:
     repo = factory()
 
     assert await repo.find_by_username("x") is None
@@ -30,5 +33,5 @@ async def repo_contract(factory):
     ],
 )
 @pytest.mark.asyncio
-async def test_contract(factory):
+async def test_contract(factory: Callable[[], UsersRepository]) -> None:
     await repo_contract(factory)

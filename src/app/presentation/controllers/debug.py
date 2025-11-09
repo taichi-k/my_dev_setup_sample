@@ -7,13 +7,13 @@ log = logging.getLogger("app")
 
 
 @router.get("/sentry-debug")
-async def trigger_error():
+async def trigger_error() -> dict:
     division_by_zero = 1 / 0
     return {"result": division_by_zero}
 
 
 @router.get("/sleep")
-async def sleep_endpoint():
+async def sleep_endpoint() -> dict:
     import asyncio
 
     await asyncio.sleep(5)

@@ -7,7 +7,7 @@ from opentelemetry import trace
 
 
 class JsonFormatter(logging.Formatter):
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         base = {
             "level": record.levelname,
             "logger": record.name,
@@ -26,7 +26,7 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(base, ensure_ascii=False)
 
 
-def setup_logging():
+def setup_logging() -> None:
     h = logging.StreamHandler(sys.stdout)
     h.setFormatter(JsonFormatter())
     root = logging.getLogger()

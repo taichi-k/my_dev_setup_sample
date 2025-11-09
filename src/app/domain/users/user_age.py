@@ -7,6 +7,6 @@ from app.domain.errors import ValidationFailed
 class UserAge:
     value: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not (0 <= self.value <= 130):
             raise ValidationFailed(field="Age", reason="Age must be between 0 and 130")

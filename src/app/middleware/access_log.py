@@ -9,12 +9,6 @@ log = logging.getLogger("app")
 
 
 async def access_log_middleware(request: Request, call_next):
-    """
-    アクセスログを記録するmiddleware
-
-    リクエストの開始から終了までの時間、ステータスコード、
-    クライアント情報などを構造化ログとして出力する
-    """
     start = time.perf_counter()
     resp: Response | None = None
     try:

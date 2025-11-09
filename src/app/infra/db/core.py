@@ -1,6 +1,6 @@
 # app/infrastructure/db/core.py
 import os
-from typing import AsyncIterator
+from typing import AsyncIterator, Callable
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -34,7 +34,9 @@ def make_session_maker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
     return async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
-def make_get_session(session_factory: async_sessionmaker[AsyncSession]):
+def make_get_session(
+    session_factory: async_sessionmaker[AsyncSession],
+) -> Callable[[], AsyncIterator[AsyncSession]]:
     async def _get_session() -> AsyncIterator[AsyncSession]:
         async with session_factory() as session:
             yield session
