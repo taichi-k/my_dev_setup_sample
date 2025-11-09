@@ -5,9 +5,11 @@ from app.infra.repositories.mock_users_repository import MockUsersRepository
 from app.main import app
 from app.presentation.controllers.users_deps import get_users_service
 
+mock_repo = MockUsersRepository()
+
 
 def override_users_service() -> UsersService:
-    return UsersService(MockUsersRepository())
+    return UsersService(mock_repo)
 
 
 app.dependency_overrides[get_users_service] = override_users_service
