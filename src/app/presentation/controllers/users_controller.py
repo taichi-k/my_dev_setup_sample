@@ -6,13 +6,21 @@ from app.application.users.users_service import UsersService
 from app.domain.common.email import Email
 from app.presentation.controllers.users_deps import get_users_service
 from app.presentation.dto.users_request import CreateUserRequest
-from app.presentation.dto.users_response import CreateUserResponse, GetUserResponse
+from app.presentation.dto.users_response import CreateUserResponse, ErrorResponse, GetUserResponse
 
 router = APIRouter()
 log = logging.getLogger("app")
 
 
-@router.post("/create")
+@router.post(
+    "/create",
+    responses={
+        409: {
+            "model": ErrorResponse,
+            "description": "Conflict: user already exists",
+        }
+    },
+)
 async def create_user(
     request: CreateUserRequest,
     users_service: UsersService = Depends(get_users_service),

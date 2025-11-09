@@ -34,3 +34,10 @@ def test_users_get_path_returns_200() -> None:
     username = "default"
     res = client.get(f"/user/{username}")
     assert res.status_code == 200
+
+
+def test_users_create_path_conflict() -> None:
+    duplicated_user_data = {"username": "default", "age": 30, "email": "default@example.com"}
+    res = client.post("/user/create", json=duplicated_user_data)
+    assert res.status_code == 409
+    assert res.json().get("error", {}).get("code") == "conflict"
