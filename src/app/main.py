@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import logging
 import os
+from typing import Awaitable, Callable
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from opentelemetry import metrics, trace
 from opentelemetry._logs import set_logger_provider
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
@@ -81,7 +82,9 @@ setup_middlewares(app)
 
 
 @app.middleware("http")
-async def metrics_middleware(request, call_next) -> None:
+async def metrics_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     import time
 
     start = time.perf_counter()
@@ -96,7 +99,7 @@ async def metrics_middleware(request, call_next) -> None:
         raise e
     finally:
         duration = time.perf_counter() - start
-        attributes = {
+        attributes: dict[str, str | int] = {
             "path": request.url.path,
             "method": request.method,
             "status_code": status_code,

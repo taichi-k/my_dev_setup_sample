@@ -46,7 +46,7 @@ class SQLAlchemyUsersRepository(UsersRepository):
             await self.session.rollback()
             log.error(f"Unexpected error when saving user: {e}")
             raise ExternalServiceError(
-                __class__.__name__, "Failed to save user due to an unexpected error"
+                self.__class__.__name__, "Failed to save user due to an unexpected error"
             ) from e
 
     async def find_by_username(self, username: str) -> User | None:

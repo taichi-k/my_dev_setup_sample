@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import logging
 import time
+from typing import Awaitable, Callable
 
 from fastapi import Request, Response
 
 log = logging.getLogger("app")
 
 
-async def access_log_middleware(request: Request, call_next):
+async def access_log_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     start = time.perf_counter()
     resp: Response | None = None
     try:
@@ -27,7 +30,11 @@ async def access_log_middleware(request: Request, call_next):
                 "query": str(request.url.query) if request.url.query else "",
                 "status": getattr(resp, "status_code", 0),
                 "latency_ms": round(dur_ms, 1),
-                "client_ip": (xff.split(",")[0].strip() if xff else request.client.host),
+                "client_ip": (
+                    xff.split(",")[0].strip()
+                    if xff
+                    else (request.client.host if request.client else "-")
+                ),
                 "user_agent": ua,
                 "service": "app",
                 "env": "dev",
