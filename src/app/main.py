@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from opentelemetry import metrics, trace
 from opentelemetry._logs import set_logger_provider
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
@@ -18,14 +18,12 @@ from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging_conf import setup_logging
-from app.db import get_session
+from app.infra.db.core import engine
 from app.middleware.middleware_config import setup_middlewares
 from app.observability.sentry import setup_sentry
-from app.presentation.controllers import debug, users_controller
+from app.presentation.controllers import debug, health, users_controller
 
 setup_logging()
 log = logging.getLogger("app")
@@ -49,7 +47,7 @@ metric_reader = PeriodicExportingMetricReader(
     OTLPMetricExporter(endpoint=OTLP_ENDPOINT, insecure=True)
 )
 meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
-metrics.set_meter_provider(meter_provider)  # ← 追加
+metrics.set_meter_provider(meter_provider)
 
 meter = metrics.get_meter("app.http")
 req_counter = meter.create_counter(
@@ -77,6 +75,7 @@ log.addHandler(otel_handler)
 app = FastAPI(title="FastAPI + Postgres + uv Starter")
 app.include_router(debug.router, prefix="/api/debug", tags=["debug"])
 app.include_router(users_controller.router, prefix="/user", tags=["user"])
+app.include_router(health.router, prefix="/health", tags=["health"])
 
 setup_middlewares(app)
 
@@ -86,34 +85,31 @@ async def metrics_middleware(request, call_next):
     import time
 
     start = time.perf_counter()
+    response = None
+    status_code = 500
     try:
         response = await call_next(request)
+        status_code = response.status_code
         return response
+    except Exception as e:
+        log.error(f"Error processing request: {e}")
+        raise e
     finally:
         duration = time.perf_counter() - start
         attributes = {
             "path": request.url.path,
             "method": request.method,
-            "status_code": getattr(response, "status_code", 500),
+            "status_code": status_code,
         }
         req_counter.add(1, attributes)
         req_latency.record(duration, attributes)
 
 
-FastAPIInstrumentor.instrument_app(app)
-
 try:
-    SQLAlchemyInstrumentor().instrument()
+    SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)
 except Exception as e:
     log.warning("SQLAlchemy instrumentation skipped: %s", e)
-
-
-@app.get("/health")
-async def health(session: AsyncSession = Depends(get_session)) -> dict:
-    # DB 接続の簡易確認
-    row = await session.execute(text("SELECT version()"))
-    version = row.scalar_one()
-    return {"ok": True, "db_version": version}
+FastAPIInstrumentor.instrument_app(app)
 
 
 @app.get("/")

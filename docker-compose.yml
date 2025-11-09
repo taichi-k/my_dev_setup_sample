@@ -6,6 +6,8 @@ services:
       dockerfile: app.Dockerfile
     tty: true
     environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL_SYNC=${DATABASE_URL_SYNC}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
       - OTEL_SERVICE_VERSION=${OTEL_SERVICE_VERSION}

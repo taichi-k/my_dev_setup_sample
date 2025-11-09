@@ -1,6 +1,16 @@
 from fastapi.testclient import TestClient
 
+from app.application.users.users_service import UsersService
+from app.infra.repositories.mock_users_repository import MockUsersRepository
 from app.main import app
+from app.presentation.controllers.users_deps import get_users_service
+
+
+def override_users_service():
+    return UsersService(MockUsersRepository())
+
+
+app.dependency_overrides[get_users_service] = override_users_service
 
 client = TestClient(app)
 

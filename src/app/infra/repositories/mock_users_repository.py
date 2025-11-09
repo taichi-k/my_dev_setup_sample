@@ -8,21 +8,25 @@ class MockUsersRepository(UsersRepository):
     def __init__(self):
         self.users = [User(username="default", age=UserAge(30), email=Email("default@example.com"))]
 
-    def save(self, user: User) -> None:
-        if self.exists_by_username(user.username):
+    async def save(self, user: User) -> None:
+        if await self.exists_by_username(user.username):
             raise Conflict("User already exists")
-        if self.exists_by_email(user.email):
+        if await self.exists_by_email(user.email):
             raise Conflict("Email already exists")
         self.users.append(user)
 
-    def find_by_username(self, username: str) -> User | None:
+    async def find_by_username(self, username: str) -> User | None:
         for user in self.users:
             if user.username == username:
                 return user
         return None
 
-    def exists_by_username(self, username: str) -> bool:
-        return any(user.username == username for user in self.users)
+    async def exists_by_username(self, username: str) -> bool:
+        exists = any(user.username == username for user in self.users)
+        print(f"exists_by_username({username}) -> {exists}")
+        return exists
 
-    def exists_by_email(self, email: Email) -> bool:
-        return any(user.email == email for user in self.users)
+    async def exists_by_email(self, email: Email) -> bool:
+        exists = any(user.email == email for user in self.users)
+        print(f"exists_by_email({email}) -> {exists}")
+        return exists

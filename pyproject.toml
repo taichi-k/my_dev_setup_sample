@@ -28,6 +28,7 @@ dependencies = [
     "opentelemetry-instrumentation-sqlalchemy>=0.59b0",
     "alembic>=1.17.1",
     "greenlet>=3.2.4",
+    "psycopg2-binary>=2.9.11",
 ]
 
 
