@@ -32,6 +32,7 @@ tasks:
     cmds:
       - brew install uv
       - uv sync --group dev
+      - uv tool install pre-commit
       - pre-commit install
   up:
     cmds:
