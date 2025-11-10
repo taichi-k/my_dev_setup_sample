@@ -20,7 +20,7 @@ sqs = boto3.client(
 )
 
 
-def setup_queues():
+def setup_queues() -> tuple[str, str]:
     # FastAPI側と同じロジック（複数回呼ばれても冪等）
     dlq_resp = sqs.create_queue(QueueName=SQS_DLQ_NAME)
     dlq_url = dlq_resp["QueueUrl"]
@@ -50,7 +50,7 @@ def setup_queues():
 SQS_QUEUE_URL, SQS_DLQ_URL = setup_queues()
 
 
-def process_message(body: dict):
+def process_message(body: dict) -> None:
     requested_at = body.get("requested_at")
     processed_at = datetime.now(timezone.utc).isoformat()
 
@@ -60,7 +60,7 @@ def process_message(body: dict):
     print(f"[WORKER] OK requested_at={requested_at}, processed_at={processed_at}")
 
 
-def main():
+def main() -> None:
     print("[WORKER] started. waiting for messages...")
 
     while True:

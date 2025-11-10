@@ -24,8 +24,7 @@ sqs = boto3.client(
 )
 
 
-def setup_queues():
-    # 1. DLQ 作成
+def setup_queues() -> tuple[str, str]:
     dlq_resp = sqs.create_queue(QueueName=SQS_DLQ_NAME)
     dlq_url = dlq_resp["QueueUrl"]
 
@@ -59,7 +58,7 @@ SQS_QUEUE_URL, SQS_DLQ_URL = setup_queues()
 
 
 @router.get("/sqs")
-async def async_proc():
+async def async_proc() -> dict:
     requested_at = datetime.now(timezone.utc).isoformat()
 
     sqs.send_message(
