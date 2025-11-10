@@ -29,6 +29,7 @@ dependencies = [
     "alembic>=1.17.1",
     "greenlet>=3.2.4",
     "psycopg2-binary>=2.9.11",
+    "boto3>=1.40.69",
 ]
 
 

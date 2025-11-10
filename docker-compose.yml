@@ -16,6 +16,12 @@ services:
       - OTEL_LOGS_EXPORTER=${OTEL_LOGS_EXPORTER}
       - OTEL_EXPORTER_OTLP_PROTOCOL=${OTEL_EXPORTER_OTLP_PROTOCOL}
       - SENTRY_DSN=${SENTRY_DSN}
+      - AWS_REGION=ap-northeast-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - SQS_QUEUE_NAME=async-queue
+      - SQS_DLQ_NAME=async-queue-dlq
     volumes:
       - .:/workspace
     depends_on:
@@ -23,7 +29,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    labels:                             # ← ここ大事：ラベルをLokiラベルに昇格させる
+      localstack:
+        condition: service_healthy
+    labels:
       - "obs.service=app"
       - "obs.project=myproj"
       - "obs.env=dev"
@@ -116,6 +124,43 @@ services:
       timeout: 5s
       retries: 30
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    environment:
+      - SERVICES=sqs,s3
+      - EDGE_PORT=4566
+      - AWS_DEFAULT_REGION=ap-northeast-1
+    ports:
+      - "4566:4566"
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    tty: true
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL_SYNC=${DATABASE_URL_SYNC}
+      - AWS_REGION=ap-northeast-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - SQS_QUEUE_NAME=async-queue
+      - SQS_DLQ_NAME=async-queue-dlq
+    volumes:
+      - .:/workspace
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    labels:
+      - "obs.service=worker"
+      - "obs.project=myproj"
+      - "obs.env=dev"
 volumes:
   pgdata:
   redis-data:

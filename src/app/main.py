@@ -24,7 +24,7 @@ from app.core.logging_conf import setup_logging
 from app.infra.db.core import engine
 from app.middleware.middleware_config import setup_middlewares
 from app.observability.sentry import setup_sentry
-from app.presentation.controllers import debug, health, users_controller
+from app.presentation.controllers import async_proc, debug, health, users_controller
 from app.presentation.error_handlers import register_error_handlers
 
 setup_logging()
@@ -75,9 +75,10 @@ otel_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provide
 log.addHandler(otel_handler)
 
 app = FastAPI(title="FastAPI + Postgres + uv Starter")
-app.include_router(debug.router, prefix="/api/debug", tags=["debug"])
+app.include_router(debug.router, prefix="/debug", tags=["debug"])
 app.include_router(users_controller.router, prefix="/user", tags=["user"])
 app.include_router(health.router, prefix="/health", tags=["health"])
+app.include_router(async_proc.router, prefix="/async_proc", tags=["async_proc"])
 
 register_error_handlers(app)
 
