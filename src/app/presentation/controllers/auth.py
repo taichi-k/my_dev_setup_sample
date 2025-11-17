@@ -1,7 +1,9 @@
+import json
 import logging
 import os
 import secrets
 
+import redis
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -9,6 +11,8 @@ from starlette.config import Config
 
 router = APIRouter()
 log = logging.getLogger("app")
+
+redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
 
 config = Config(
     environ={
@@ -41,7 +45,7 @@ async def google_login(request: Request) -> RedirectResponse:
 
 
 @router.get("/callback", response_model=None)
-async def google_callback(request: Request) -> RedirectResponse | JSONResponse:
+async def google_callback(request: Request, response: Response) -> RedirectResponse | JSONResponse:
     received_state = request.query_params.get("state")
     stored_state = request.session.get("oauth_state")
 
@@ -83,15 +87,22 @@ async def google_callback(request: Request) -> RedirectResponse | JSONResponse:
 
     request.session.pop("oauth_nonce", None)
 
-    request.session["user"] = dict(user_info)
-    request.session["access_token"] = token.get("access_token")
-    request.session["refresh_token"] = token.get("refresh_token")
-    request.session["token_type"] = token.get("token_type", "Bearer")
-    request.session["scope"] = token.get("scope", "")
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        session_id = secrets.token_urlsafe(32)
+
+    session_data = {
+        "user": dict(user_info),
+        "access_token": token.get("access_token"),
+        "refresh_token": token.get("refresh_token"),
+        "token_type": token.get("token_type", "Bearer"),
+        "scope": token.get("scope", ""),
+    }
+    redis_client.setex(f"session:{session_id}", 3600, json.dumps(session_data))
 
     redirect = RedirectResponse(url="/auth/logged_in", status_code=303)
     redirect.set_cookie(
-        key="scope", value=token.get("scope", ""), httponly=True, secure=True, samesite="lax"
+        key="session_id", value=session_id, httponly=True, secure=True, samesite="lax", max_age=3600
     )
 
     log.info(
@@ -111,14 +122,19 @@ async def google_callback(request: Request) -> RedirectResponse | JSONResponse:
 
 @router.get("/logged_in")
 async def check_logged_in(request: Request, response: Response) -> dict:
-    user = request.session.get("user")
-    access_token = request.session.get("access_token")
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        return {"logged_in": False}
+
+    session_data_str = redis_client.get(f"session:{session_id}")
+    if not session_data_str:
+        return {"logged_in": False}
+
+    session_data = json.loads(str(session_data_str))
+    user = session_data.get("user")
+    access_token = session_data.get("access_token")
 
     if user and access_token:
-        response.set_cookie(
-            key="access_token", value=access_token, httponly=True, secure=True, samesite="lax"
-        )
-
         return {
             "logged_in": True,
             "user": user["email"],
@@ -128,6 +144,11 @@ async def check_logged_in(request: Request, response: Response) -> dict:
 
 
 @router.get("/logout")
-async def trigger_logout(request: Request) -> dict:
-    request.session.clear()
+async def trigger_logout(request: Request, response: Response) -> dict:
+    session_id = request.cookies.get("session_id")
+    if session_id:
+        redis_client.delete(f"session:{session_id}")
+
+    response.delete_cookie("session_id")
+
     return {"result": "logout endpoint"}
