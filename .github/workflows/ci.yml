@@ -41,6 +41,7 @@ jobs:
           uv run mypy .
   test:
     runs-on: ubuntu-latest
+    environment: test
     needs: typecheck
     timeout-minutes: 15
     steps:
