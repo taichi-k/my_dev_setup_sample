@@ -51,6 +51,9 @@ jobs:
       AWS_ENDPOINT_URL: ${{ secrets.AWS_ENDPOINT_URL }}
       SQS_QUEUE_NAME: ${{ secrets.SQS_QUEUE_NAME }}
       SQS_DLQ_NAME: ${{ secrets.SQS_DLQ_NAME }}
+      SESSION_SECRET_KEY: ${{ secrets.SESSION_SECRET_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     needs: typecheck
     timeout-minutes: 15
     steps:
