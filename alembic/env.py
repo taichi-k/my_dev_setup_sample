@@ -17,7 +17,7 @@ if str(SRC_DIR) not in sys.path:
 # access to the values within the .ini file in use.
 config = context.config
 
-database_url = os.getenv("DATABASE_URL_SYNC", "")
+database_url = os.getenv("DATABASE_URL_SYNC", "postgresql+psycopg2://postgres:postgres@db:5432/app")
 print("Using database URL for migrations:", database_url)
 config.set_main_option("sqlalchemy.url", database_url)
 
