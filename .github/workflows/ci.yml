@@ -48,6 +48,7 @@ jobs:
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      AWS_ENDPOINT_URL: http://localhost:4566
     needs: typecheck
     timeout-minutes: 15
     steps:

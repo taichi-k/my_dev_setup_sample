@@ -4,7 +4,7 @@ import os
 import boto3
 
 AWS_REGION = os.getenv("AWS_REGION", "ap-northeast-1")
-AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL")
+AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL", "http://localstack:4566")
 SQS_DLQ_NAME = os.getenv("SQS_DLQ_NAME", "async-queue-dlq")
 
 sqs = boto3.client(
