@@ -61,5 +61,4 @@ jobs:
           task up:obs
       - name: Python test
         run: |
-          uv sync --dev
           task test
