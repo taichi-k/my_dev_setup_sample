@@ -75,4 +75,5 @@ tasks:
   test:
     desc: "Run tests"
     cmds:
-      - OTEL_SDK_DISABLED=true uv run pytest --tb=short --disable-warnings
+      # - OTEL_SDK_DISABLED=true docker compose exec app uv run pytest --tb=short --disable-warnings
+      - docker compose exec app uv run pytest --tb=short --disable-warnings
