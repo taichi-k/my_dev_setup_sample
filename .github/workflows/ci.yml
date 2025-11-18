@@ -49,6 +49,8 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       AWS_ENDPOINT_URL: ${{ secrets.AWS_ENDPOINT_URL }}
+      SQS_QUEUE_NAME: ${{ secrets.SQS_QUEUE_NAME }}
+      SQS_DLQ_NAME: ${{ secrets.SQS_DLQ_NAME }}
     needs: typecheck
     timeout-minutes: 15
     steps:
