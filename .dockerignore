@@ -1,6 +1,12 @@
-# 一般的な除外ルール
+.venv
+__pycache__
 .DS_Store
 .AppleDouble
 .LSOverride
 Icon
 ._*
+*.pyc
+.git
+.gitignore
+.env
+.env.*
