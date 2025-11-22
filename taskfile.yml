@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   COMPOSE_FILES: "-f docker-compose.yml -f docker-compose.obs.yml"
-  OBS_SERVICES: grafana prometheus loki alertmanager nginx-exporter tempo otel-collector
+  OBS_SERVICES: grafana prometheus loki alertmanager nginx-exporter tempo
 
 env:
   MYENV: 'myenv'
