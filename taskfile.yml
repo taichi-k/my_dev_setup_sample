@@ -13,6 +13,12 @@ tasks:
   default:
     cmds:
       - task --list-all
+  checkenv:
+    desc: "Check different env vars"
+    cmds:
+      - echo {{.AWS_PROFILE}}
+      - echo {{.AWS_ACCOUNT_ID}}
+      - echo {{.AWS_ECR_ENV}}
   globalenv:
     cmds:
       - echo $MYENV
@@ -77,3 +83,7 @@ tasks:
     cmds:
       # - OTEL_SDK_DISABLED=true docker compose exec app uv run pytest --tb=short --disable-warnings
       - docker compose exec app uv run pytest --tb=short --disable-warnings
+  ecr:
+    desc: "Build & push images to ECR"
+    cmds:
+      - AWS_PROFILE={{.AWS_PROFILE}} AWS_ACCOUNT_ID={{.AWS_ACCOUNT_ID}} ./deploy/push_ecr.sh {{.AWS_ECR_ENV}}
