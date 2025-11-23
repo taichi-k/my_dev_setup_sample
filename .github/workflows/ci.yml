@@ -63,11 +63,9 @@ jobs:
       - name: Install Task
         run: |
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
-      # - name: Install uv
-      #   uses: astral-sh/setup-uv@v6
-      #   with:
-      #     version: "latest"
-      #     enable-cache: true
+      - name: Tune vm.max_map_count for Elasticsearch
+        run: |
+          sudo sysctl -w vm.max_map_count=262144
       - name: Start infra (LocalStack, DB, etc.)
         run: |
           task up
