@@ -12,7 +12,15 @@ from starlette.config import Config
 router = APIRouter()
 log = logging.getLogger("app")
 
-redis_client = redis.Redis(host="redis", port=6379, decode_responses=True)
+GOOGLE_AUTH_REDIRECT_URL = os.getenv(
+    "GOOGLEAUTH_REDIRECT_URL", "http://localhost:8080/auth/callback"
+)
+
+redis_client = redis.Redis(
+    host=os.getenv("REDIS_HOST", "redis"),
+    port=int(os.getenv("REDIS_PORT", "6379")),
+    decode_responses=True,
+)
 
 config = Config(
     environ={
@@ -38,9 +46,13 @@ async def google_login(request: Request) -> RedirectResponse:
     nonce = secrets.token_urlsafe(32)
     request.session["oauth_nonce"] = nonce
 
-    redirect_uri = "http://localhost:8080/auth/callback"
     return await oauth.google.authorize_redirect(
-        request, redirect_uri, state=state, nonce=nonce, access_type="offline", prompt="consent"
+        request,
+        GOOGLE_AUTH_REDIRECT_URL,
+        state=state,
+        nonce=nonce,
+        access_type="offline",
+        prompt="consent",
     )
 
 
