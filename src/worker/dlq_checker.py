@@ -2,13 +2,14 @@ import json
 import os
 
 import boto3
+from mypy_boto3_sqs import SQSClient
 
 AWS_REGION = os.getenv("AWS_REGION", "ap-northeast-1")
 AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL")
 SQS_DLQ_NAME = os.getenv("SQS_DLQ_NAME", "async-queue-dlq")
 
 
-def create_sqs_client():
+def create_sqs_client() -> SQSClient:
     if AWS_ENDPOINT_URL:
         return boto3.client(
             "sqs",
