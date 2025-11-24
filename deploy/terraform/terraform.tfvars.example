@@ -1,0 +1,45 @@
+# ========================================
+# General Settings
+# ========================================
+environment  = "dev"
+project_name = "test"
+aws_region   = "ap-northeast-1"
+
+# ========================================
+# App Service Variables
+# ========================================
+app_secret_key_for_session_middleware = "changeMeToASecureRandomString"
+app_google_client_id                  = "yourid.apps.googleusercontent.com"
+app_google_client_secret              = "yoursecret"
+app_database_url                      = "postgresql+asyncpg://postgres:postgres@db:5432/app"
+app_database_url_sync                 = "postgresql+psycopg2://postgres:postgres@db:5432/app"
+app_otel_exporter_otlp_endpoint       = "otel-collector:4317"
+app_otel_service_name                 = "app"
+app_otel_service_version              = "1.0.0"
+app_otel_service_namespace            = "myproj"
+app_otel_deployment_environment       = "dev"
+app_otel_logs_exporter                = "otlp"
+app_otel_exporter_otlp_protocol       = "http/protobuf"
+app_sentry_dsn                        = "yoursentrydsn"
+app_aws_region                        = "ap-northeast-1"
+app_sqs_queue_name                    = "async-queue"
+app_sqs_dlq_name                      = "async-queue-dlq"
+app_sqs_queue_url                     = ""
+app_sqs_dlq_url                       = ""
+app_redis_host                        = "redis"
+app_redis_port                        = "6379"
+
+# ========================================
+# Worker Service Variables
+# ========================================
+worker_database_url           = "postgresql+asyncpg://postgres:postgres@db:5432/app"
+worker_database_url_sync      = "postgresql+psycopg2://postgres:postgres@db:5432/app"
+worker_aws_region             = "ap-northeast-1"
+worker_sqs_queue_name         = "async-queue"
+worker_sqs_dlq_name           = "async-queue-dlq"
+
+# ========================================
+# OTEL Collector Variables
+# ========================================
+otel_collector_loki_host = "loki"
+otel_collector_loki_port = "3100"
