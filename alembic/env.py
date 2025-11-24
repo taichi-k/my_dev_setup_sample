@@ -6,12 +6,13 @@ from pathlib import Path
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from app.infra.db.core import Base
 
 BASE_DIR = Path(__file__).resolve().parents[1]  # project_root
 SRC_DIR = BASE_DIR / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+
+from app.infra.db.core import Base  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
