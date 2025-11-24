@@ -4,16 +4,23 @@ import os
 import boto3
 
 AWS_REGION = os.getenv("AWS_REGION", "ap-northeast-1")
-AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL", "http://localstack:4566")
+AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL")
 SQS_DLQ_NAME = os.getenv("SQS_DLQ_NAME", "async-queue-dlq")
 
-sqs = boto3.client(
-    "sqs",
-    region_name=AWS_REGION,
-    endpoint_url=AWS_ENDPOINT_URL,
-    aws_access_key_id="test",
-    aws_secret_access_key="test",
-)
+
+def create_sqs_client():
+    if AWS_ENDPOINT_URL:
+        return boto3.client(
+            "sqs",
+            region_name=AWS_REGION,
+            endpoint_url=AWS_ENDPOINT_URL,
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "test"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "test"),
+        )
+    return boto3.client("sqs", region_name=AWS_REGION)
+
+
+sqs = create_sqs_client()
 
 dlq_url = sqs.get_queue_url(QueueName=SQS_DLQ_NAME)["QueueUrl"]
 
