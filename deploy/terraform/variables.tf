@@ -38,6 +38,11 @@ variable "app_google_client_secret" {
   sensitive   = true
 }
 
+variable "app_google_auth_redirect_url" {
+  description = "Google OAuth redirect URL"
+  type        = string
+}
+
 variable "app_database_url" {
   description = "Database URL for async connections"
   type        = string

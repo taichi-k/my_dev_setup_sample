@@ -13,7 +13,7 @@ router = APIRouter()
 log = logging.getLogger("app")
 
 GOOGLE_AUTH_REDIRECT_URL = os.getenv(
-    "GOOGLEAUTH_REDIRECT_URL", "http://localhost:8080/auth/callback"
+    "GOOGLE_AUTH_REDIRECT_URL", "http://localhost:8080/auth/callback"
 )
 
 redis_client = redis.Redis(

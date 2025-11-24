@@ -38,6 +38,18 @@ resource "aws_ssm_parameter" "app_google_client_secret" {
   }
 }
 
+resource "aws_ssm_parameter" "app_google_auth_redirect_url" {
+  name  = "/${var.project_name}/${var.environment}/app/GOOGLE_AUTH_REDIRECT_URL"
+  type  = "String"
+  value = var.app_google_auth_redirect_url
+
+  tags = {
+    Service     = "app"
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
 resource "aws_ssm_parameter" "app_database_url" {
   name  = "/${var.project_name}/${var.environment}/app/DATABASE_URL"
   type  = "SecureString"
