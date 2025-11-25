@@ -254,6 +254,18 @@ resource "aws_ssm_parameter" "app_redis_port" {
   }
 }
 
+resource "aws_ssm_parameter" "app_redis_use_tls" {
+  name  = "/${var.project_name}/${var.environment}/app/REDIS_USE_TLS"
+  type  = "String"
+  value = var.app_redis_use_tls
+
+  tags = {
+    Service     = "app"
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
 # ========================================
 # Worker Service Parameters
 # ========================================

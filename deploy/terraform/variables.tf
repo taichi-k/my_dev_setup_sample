@@ -131,6 +131,11 @@ variable "app_redis_port" {
   type        = string
 }
 
+variable "app_redis_use_tls" {
+  description = "Whether to use TLS for Redis connection"
+  type        = string
+}
+
 # ========================================
 # Worker Service Variables
 # ========================================

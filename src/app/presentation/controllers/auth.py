@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import secrets
+import ssl
 
 import redis
 from authlib.integrations.starlette_client import OAuth
@@ -16,11 +17,20 @@ GOOGLE_AUTH_REDIRECT_URL = os.getenv(
     "GOOGLE_AUTH_REDIRECT_URL", "http://localhost:8080/auth/callback"
 )
 
-redis_client = redis.Redis(
-    host=os.getenv("REDIS_HOST", "redis"),
-    port=int(os.getenv("REDIS_PORT", "6379")),
-    decode_responses=True,
-)
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+REDIS_USE_TLS = os.getenv("REDIS_USE_TLS", "false").lower() == "true"
+
+redis_kwargs: dict = {
+    "host": REDIS_HOST,
+    "port": REDIS_PORT,
+    "decode_responses": True,
+}
+
+if REDIS_USE_TLS:
+    redis_kwargs.update({"ssl": True, "ssl_cert_reqs": ssl.CERT_NONE})
+
+redis_client = redis.Redis(**redis_kwargs)
 
 config = Config(
     environ={
@@ -58,8 +68,13 @@ async def google_login(request: Request) -> RedirectResponse:
 
 @router.get("/callback", response_model=None)
 async def google_callback(request: Request, response: Response) -> RedirectResponse | JSONResponse:
+    log.info("callback: start / entering state check")
+    log.info(f"REDIS_HOST={os.getenv('REDIS_HOST')}, REDIS_PORT={os.getenv('REDIS_PORT')}")
     received_state = request.query_params.get("state")
     stored_state = request.session.get("oauth_state")
+    log.info(
+        f"callback: after state check - received_state={received_state}, stored_state={stored_state}"
+    )
 
     if not received_state or not stored_state or received_state != stored_state:
         log.warning(
@@ -71,14 +86,21 @@ async def google_callback(request: Request, response: Response) -> RedirectRespo
     request.session.pop("oauth_state", None)
 
     try:
+        log.info("callback: before authorize_access_token")
         token = await oauth.google.authorize_access_token(request)
+        log.info("callback: after authorize_access_token")
     except Exception as e:
         log.error(f"OAuth callback error: {e}")
         return JSONResponse(content={"error": "認可コードが見つかりません"}, status_code=400)
 
+    log.info("callback: after token get")
+
     id_token = token.get("id_token")
     stored_nonce = request.session.get("oauth_nonce")
+    log.info(f"callback: after get nonce - id_token={bool(id_token)}, stored_nonce={stored_nonce}")
+
     user_info = token.get("userinfo")
+    log.info(f"callback: after get user_info - has_user_info={bool(user_info)}")
 
     if not (id_token and stored_nonce and user_info):
         log.error(
@@ -89,6 +111,7 @@ async def google_callback(request: Request, response: Response) -> RedirectRespo
 
     claims = token.get("id_token_claims") or user_info
     token_nonce = claims.get("nonce")
+    log.info(f"callback: after nonce from claims - token_nonce={token_nonce}")
 
     if not token_nonce or token_nonce != stored_nonce:
         log.warning(
@@ -98,10 +121,14 @@ async def google_callback(request: Request, response: Response) -> RedirectRespo
         return JSONResponse(content={"error": "Invalid nonce parameter"}, status_code=400)
 
     request.session.pop("oauth_nonce", None)
+    log.info("callback: after pop oauth_nonce")
 
     session_id = request.cookies.get("session_id")
     if not session_id:
         session_id = secrets.token_urlsafe(32)
+    log.info(
+        f"callback: after session_id - session_id is new? {not bool(request.cookies.get('session_id'))}"
+    )
 
     session_data = {
         "user": dict(user_info),
@@ -110,11 +137,15 @@ async def google_callback(request: Request, response: Response) -> RedirectRespo
         "token_type": token.get("token_type", "Bearer"),
         "scope": token.get("scope", ""),
     }
+    log.info("callback: after build session_data")
+
+    log.info("callback: before redis setex")
     redis_client.setex(f"session:{session_id}", 3600, json.dumps(session_data))
+    log.info("callback: after redis setex")
 
     redirect = RedirectResponse(url="/auth/logged_in", status_code=303)
     redirect.set_cookie(
-        key="session_id", value=session_id, httponly=True, secure=True, samesite="lax", max_age=3600
+        key="session_id", value=session_id, httponly=True, samesite="lax", max_age=3600
     )
 
     log.info(
@@ -128,6 +159,8 @@ async def google_callback(request: Request, response: Response) -> RedirectRespo
             }
         },
     )
+
+    log.info("callback: end / returning redirect")
 
     return redirect
 
