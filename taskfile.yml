@@ -62,6 +62,15 @@ tasks:
     cmds:
       - docker compose {{.COMPOSE_FILES}} stop {{.OBS_SERVICES}}
       - docker compose {{.COMPOSE_FILES}} rm -f {{.OBS_SERVICES}}
+  up:es:
+    desc: "Start Elasticsearch and Kibana"
+    cmds:
+      - docker compose {{.COMPOSE_FILES}} up -d --no-recreate elasticsearch kibana
+  down:es:
+    desc: "Stop Elasticsearch and Kibana"
+    cmds:
+      - docker compose {{.COMPOSE_FILES}} stop elasticsearch kibana
+      - docker compose {{.COMPOSE_FILES}} rm -f elasticsearch kibana
   fix:prom_permission:
     desc: "Fix Prometheus data directory permission"
     cmds:
