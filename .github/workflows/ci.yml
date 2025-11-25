@@ -54,6 +54,8 @@ jobs:
       SECRET_KEY_FOR_SESSION_MIDDLEWARE: ${{ secrets.SECRET_KEY_FOR_SESSION_MIDDLEWARE }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      REDIS_PORT: ${{ secrets.REDIS_PORT }}
     needs: typecheck
     timeout-minutes: 15
     steps:
