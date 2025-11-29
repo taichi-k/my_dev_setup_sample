@@ -20,5 +20,4 @@ __pycache__/
 .devcontainer/*.log
 
 # Terraform
-*.tfvars
 !terraform.tfvars.example

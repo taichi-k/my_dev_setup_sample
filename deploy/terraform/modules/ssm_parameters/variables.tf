@@ -1,19 +1,19 @@
 variable "environment" {
   description = "Environment name (dev, stg, prd)"
   type        = string
-  default     = ""
+  default     = "dev"
 }
 
 variable "project_name" {
   description = "Project name for parameter path prefix"
   type        = string
-  default     = ""
+  default     = "test"
 }
 
 variable "aws_region" {
   description = "AWS region for provider"
   type        = string
-  default     = ""
+  default     = "ap-northeast-1"
 }
 
 # ========================================
@@ -113,7 +113,7 @@ variable "app_sentry_dsn" {
 variable "app_aws_region" {
   description = "AWS region"
   type        = string
-  default     = ""
+  default     = "ap-northeast-1"
 }
 
 variable "app_sqs_queue_name" {
@@ -143,19 +143,18 @@ variable "app_sqs_dlq_url" {
 variable "app_redis_host" {
   description = "Redis host"
   type        = string
-  default     = ""
+  default     = "redis"
 }
 
 variable "app_redis_port" {
   description = "Redis port"
   type        = string
-  default     = ""
+  default     = "6379"
 }
 
 variable "app_redis_use_tls" {
   description = "Whether to use TLS for Redis connection"
   type        = string
-  default     = ""
 }
 
 # ========================================
@@ -166,20 +165,18 @@ variable "worker_database_url" {
   description = "Worker database URL for async connections"
   type        = string
   sensitive   = true
-  default     = ""
 }
 
 variable "worker_database_url_sync" {
   description = "Worker database URL for sync connections"
   type        = string
   sensitive   = true
-  default     = ""
 }
 
 variable "worker_aws_region" {
   description = "Worker AWS region"
   type        = string
-  default     = ""
+  default     = "ap-northeast-1"
 }
 
 variable "worker_sqs_queue_name" {
@@ -213,11 +210,11 @@ variable "worker_sqs_dlq_url" {
 variable "otel_collector_loki_host" {
   description = "Loki host for OTEL collector"
   type        = string
-  default     = ""
+  default     = "loki"
 }
 
 variable "otel_collector_loki_port" {
   description = "Loki port for OTEL collector"
   type        = string
-  default     = ""
+  default     = "3100"
 }
