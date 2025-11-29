@@ -33,7 +33,6 @@ pgdata/
 
 # Infrastructure & Deployment
 deploy/
-infra/
 trash/
 *.Dockerfile
 docker-compose*.yml

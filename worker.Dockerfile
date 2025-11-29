@@ -16,6 +16,7 @@ COPY pyproject.toml uv.lock* ./
 RUN uv sync --group dev
 
 # アプリケーションコードのコピー（必要なものだけ）
-COPY src/ ./src/
+COPY . .
+# COPY src/ ./src/
 
 CMD ["uv", "run", "python", "-m", "src.worker.async_worker"]

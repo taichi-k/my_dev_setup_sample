@@ -16,8 +16,9 @@ COPY pyproject.toml uv.lock* ./
 RUN uv sync --group dev
 
 # アプリケーションコードのコピー（必要なものだけ）
-COPY alembic.ini ./
-COPY src/ ./src/
-COPY alembic/ ./alembic/
+COPY . .
+# COPY alembic.ini ./
+# COPY src/ ./src/
+# COPY alembic/ ./alembic/
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--app-dir", "src", "--reload", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
