@@ -5,6 +5,10 @@ on:
     branches:
       - deploy-ci
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPOSITORY_APP: test/app
