@@ -18,6 +18,7 @@ jobs:
     environment: terraform-ci
 
     env:
+      TF_VAR_image_tag: ${{ github.sha }}
       TF_WORK_DIR: deploy/terraform/stg
       TF_VAR_app_database_url: ${{ secrets.TF_VAR_APP_DATABASE_URL }}
       TF_VAR_app_database_url_sync: ${{ secrets.TF_VAR_APP_DATABASE_URL_SYNC }}
