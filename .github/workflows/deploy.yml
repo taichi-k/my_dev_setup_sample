@@ -150,6 +150,7 @@ jobs:
                  inferenceAccelerators,
                  ephemeralStorage
                } | with_entries(select(.value != null))
+               ')
 
           NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json "$NEW_TASK_DEF" \
