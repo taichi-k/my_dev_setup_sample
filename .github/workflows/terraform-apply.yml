@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - 'deploy/terraform/**'
+  workflow_dispatch:
+    inputs:
+      comment:
+        description: "Why are you applying?"
+        required: false
+        type: string
 
 permissions:
   id-token: write
@@ -28,6 +34,13 @@ jobs:
       TF_VAR_app_sentry_dsn: ${{ secrets.TF_VAR_APP_SENTRY_DSN }}
 
     steps:
+      - name: Print reason
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          APPLY_REASON: ${{ github.event.inputs.comment }}
+        run: |
+          echo "Apply reason: $APPLY_REASON"
+
       - name: Checkout
         uses: actions/checkout@v4
 
