@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "migration" {
   container_definitions = jsonencode([
     {
       name              = "app"
-      image             = "771623671665.dkr.ecr.ap-northeast-1.amazonaws.com/test/app@sha256:10689530f19e0bd8bb56108f6400bcc7034b599f8b6886c3996e74216bfaa1ad"
+      image             = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
       cpu               = 512
       memory            = 1024
       memoryReservation = 1024

@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name              = "app"
-      image             = "771623671665.dkr.ecr.ap-northeast-1.amazonaws.com/test/app@sha256:04abf87d3d53c6c192daf7e4e13d93455936e7d02523d69779ffae7b86c6bed8"
+      image             = "${data.aws_ecr_repository.app.repository_url}:${var.image_tag}"
       cpu               = 512
       memory            = 2048
       memoryReservation = 2048
@@ -142,7 +142,7 @@ resource "aws_ecs_task_definition" "app" {
     },
     {
       name              = "otel_collector"
-      image             = "771623671665.dkr.ecr.ap-northeast-1.amazonaws.com/test/otel_collector@sha256:d68fc4a7cdfa01d7f373c692b060e922458f779aa3e44ac408890de0844dce90"
+      image             = "${data.aws_ecr_repository.otel_collector.repository_url}:${var.image_tag}"
       cpu               = 512
       memory            = 1024
       memoryReservation = 1024

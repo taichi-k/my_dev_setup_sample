@@ -1,0 +1,76 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches:
+      - deploy-ci
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY_APP: test/app
+  ECR_REPOSITORY_OTEL_COLLECTOR: test/otel_collector
+  ECR_REPOSITORY_WORKER: test/worker
+  TF_WORKING_DIR: deploy/terraform/stg
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: deploy-ci
+
+    env:
+      TF_VAR_image_tag: ${{ github.sha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::123456789012:role/github-actions-deploy-role
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Docker image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA}
+          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+
+          IMAGE_URI_APP=${ECR_REGISTRY}/${ECR_REPOSITORY_APP}:${IMAGE_TAG}
+          echo "Building image: ${IMAGE_URI_APP}"
+          docker build -t "${IMAGE_URI_APP}" .
+          echo "Pushing image..."
+          docker push "${IMAGE_URI_APP}"
+
+          IMAGE_URI_OTEL_COLLECTOR=${ECR_REGISTRY}/${ECR_REPOSITORY_OTEL_COLLECTOR}:${IMAGE_TAG}
+          echo "Building image: ${IMAGE_URI_OTEL_COLLECTOR}"
+          docker build -t "${IMAGE_URI_OTEL_COLLECTOR}" .
+          echo "Pushing image..."
+          docker push "${IMAGE_URI_OTEL_COLLECTOR}"
+
+          IMAGE_URI_WORKER=${ECR_REGISTRY}/${ECR_REPOSITORY_WORKER}:${IMAGE_TAG}
+          echo "Building image: ${IMAGE_URI_WORKER}"
+          docker build -t "${IMAGE_URI_WORKER}" .
+          echo "Pushing image..."
+          docker push "${IMAGE_URI_WORKER}"
+        shell: bash
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform plan -out=tfplan
+
+      # - name: Terraform Apply
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: terraform apply -auto-approve tfplan

@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "worker" {
   container_definitions = jsonencode([
     {
       name              = "worker"
-      image             = "771623671665.dkr.ecr.ap-northeast-1.amazonaws.com/test/worker@sha256:acf6bc3850a4883682f0bfa22155b0741d43e7c33f02b09ea1d2990231a67a21"
+      image             = "${data.aws_ecr_repository.worker.repository_url}:${var.image_tag}"
       cpu               = 512
       memory            = 1024
       memoryReservation = 1024
