@@ -1,8 +1,3 @@
-variable "image_tag" {
-  description = "ECR image tag (e.g. git sha)"
-  type        = string
-}
-
 variable "environment" {
   description = "Environment name (dev, stg, prd)"
   type        = string
