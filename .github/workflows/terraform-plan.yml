@@ -57,7 +57,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          path: plan.txt
+          path: ${{ env.TF_WORK_DIR }}/plan.txt
 
       - name: Fail if plan failed
         if: steps.plan.outcome == 'failure'
