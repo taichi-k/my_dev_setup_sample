@@ -1,0 +1,164 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY_APP: test/app
+  ECR_REPOSITORY_OTEL_COLLECTOR: test/otel_collector
+  ECR_REPOSITORY_WORKER: test/worker
+
+  ECS_CLUSTER: test-cluster-kosugi
+  ECS_SERVICE_APP: test-app-td-service-1tlr13r8
+  ECS_SERVICE_WORKER: test-worker-td-service-6ku34fxr
+  ECS_TASK_FAMILY_APP: test-app-td
+  ECS_TASK_FAMILY_WORKER: test-worker-td
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: deploy-ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::771623671665:role/github-actions-deploy-role
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Docker image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA}
+          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+
+          IMAGE_URI_APP=${ECR_REGISTRY}/${ECR_REPOSITORY_APP}:${IMAGE_TAG}
+          echo "Building image: ${IMAGE_URI_APP}"
+          docker build -f app.Dockerfile -t "${IMAGE_URI_APP}" .
+          echo "Pushing image..."
+          docker push "${IMAGE_URI_APP}"
+          echo "IMAGE_URI_APP=${IMAGE_URI_APP}" >> $GITHUB_ENV
+
+          IMAGE_URI_OTEL_COLLECTOR=${ECR_REGISTRY}/${ECR_REPOSITORY_OTEL_COLLECTOR}:${IMAGE_TAG}
+          echo "Building image: ${IMAGE_URI_OTEL_COLLECTOR}"
+          docker build -f otelcollector.Dockerfile -t "${IMAGE_URI_OTEL_COLLECTOR}" .
+          echo "Pushing image..."
+          docker push "${IMAGE_URI_OTEL_COLLECTOR}"
+          echo "IMAGE_URI_OTEL_COLLECTOR=${IMAGE_URI_OTEL_COLLECTOR}" >> $GITHUB_ENV
+
+          IMAGE_URI_WORKER=${ECR_REGISTRY}/${ECR_REPOSITORY_WORKER}:${IMAGE_TAG}
+          echo "Building image: ${IMAGE_URI_WORKER}"
+          docker build -f worker.Dockerfile -t "${IMAGE_URI_WORKER}" .
+          echo "Pushing image..."
+          docker push "${IMAGE_URI_WORKER}"
+          echo "IMAGE_URI_WORKER=${IMAGE_URI_WORKER}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Update ECS task definition for app
+        run: |
+          set -euo pipefail
+
+          BASE_TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition "${ECS_TASK_FAMILY_APP}")
+
+          NEW_TASK_DEF=$(echo "$BASE_TASK_DEF" | jq \
+            --arg IMAGE_APP "$IMAGE_URI_APP" \
+            --arg IMAGE_OTEL "$IMAGE_URI_OTEL_COLLECTOR" \
+            '.taskDefinition
+             | .containerDefinitions |= map(
+                 if .name == "app" then .image = $IMAGE_APP
+                 elif .name == "otel_collector" then .image = $IMAGE_OTEL
+                 else .
+                 end
+               )
+             | {
+                 family,
+                 taskRoleArn,
+                 executionRoleArn,
+                 networkMode,
+                 containerDefinitions,
+                 volumes,
+                 requiresCompatibilities,
+                 cpu,
+                 memory,
+                 ipcMode,
+                 pidMode,
+                 proxyConfiguration,
+                 inferenceAccelerators,
+                 ephemeralStorage
+               }')
+
+          # 新しいタスク定義を登録
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "New app task definition: $NEW_TASK_DEF_ARN"
+
+          # サービスを新しいタスク定義で更新
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE_APP}" \
+            --task-definition "$NEW_TASK_DEF_ARN" \
+            --force-new-deployment
+
+      - name: Update ECS task definition for worker
+        run: |
+          set -euo pipefail
+
+          BASE_TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition "${ECS_TASK_FAMILY_WORKER}")
+
+          NEW_TASK_DEF=$(echo "$BASE_TASK_DEF" | jq \
+            --arg IMAGE_WORKER "$IMAGE_URI_WORKER" \
+            '.taskDefinition
+             | .containerDefinitions |= map(
+                 if .name == "worker" then .image = $IMAGE_WORKER
+                 else .
+                 end
+               )
+             | {
+                 family,
+                 taskRoleArn,
+                 executionRoleArn,
+                 networkMode,
+                 containerDefinitions,
+                 volumes,
+                 requiresCompatibilities,
+                 cpu,
+                 memory,
+                 ipcMode,
+                 pidMode,
+                 proxyConfiguration,
+                 inferenceAccelerators,
+                 ephemeralStorage
+               }')
+
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "New worker task definition: $NEW_TASK_DEF_ARN"
+
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE_WORKER}" \
+            --task-definition "$NEW_TASK_DEF_ARN" \
+            --force-new-deployment
