@@ -1,28 +1,36 @@
-# Terraform - SSM Parameter Store 管理
+# Terraform - AWS インフラ構成管理
 
-このディレクトリは、アプリケーションの環境変数をAWS Systems Manager Parameter Storeに登録するためのTerraform設定です。
+このディレクトリは、アプリケーションのAWSインフラをTerraformで管理するための設定です。
+主にSSM Parameter StoreとVPCネットワークの構成を管理します。
 
 ## 📁 ディレクトリ構成
 
 ```
 terraform/
-├── main.tf                      # プロバイダー設定
-├── variables.tf                 # 変数定義
-├── ssm_parameters.tf            # SSMパラメータリソース定義
-├── outputs.tf                   # 出力設定
-├── terraform.tfvars.example     # tfvarsのサンプル
-├── .gitignore                   # Git除外設定
-├── scripts/
-│   └── generate_tfvars.py      # .env → tfvars 変換スクリプト
-└── README.md                    # このファイル
+├── README.md                    # このファイル
+├── modules/                     # 再利用可能なモジュール
+│   ├── network/                # VPCネットワーク構成
+│   │   ├── main.tf
+│   │   └── outputs.tf
+│   └── ssm_parameters/         # SSMパラメータストア管理
+│       ├── main.tf
+│       ├── outputs.tf
+│       └── variables.tf
+├── stg/                        # ステージング環境
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars        # 環境変数（Git管理外）
+│   └── terraform.tfvars.example
+└── prd/                        # 本番環境
+    └── main.tf
 ```
 
 ## 🎯 概要
 
 以下のサービスの環境変数をSSM Parameter Storeに登録します：
 
-- **app**: メインアプリケーション (19個の環境変数)
-- **worker**: ワーカーサービス (8個の環境変数)
+- **app**: メインアプリケーション (22個の環境変数)
+- **worker**: ワーカーサービス (7個の環境変数)
 - **otel-collector**: OpenTelemetry Collector (2個の環境変数)
 
 ## 📝 命名規則
@@ -34,9 +42,9 @@ terraform/
 ```
 
 例：
-- `/test/dev/app/SECRET_KEY_FOR_SESSION_MIDDLEWARE`
-- `/test/dev/worker/DATABASE_URL`
-- `/test/dev/otel-collector/LOKI_HOST`
+- `/myproject/stg/app/SECRET_KEY_FOR_SESSION_MIDDLEWARE`
+- `/myproject/stg/worker/DATABASE_URL`
+- `/myproject/stg/otel-collector/LOKI_HOST`
 
 ## 🔐 パラメータタイプ
 
@@ -45,36 +53,34 @@ terraform/
 
 ## 🚀 使い方
 
-### 1. .envファイルからterraform.tfvarsを生成
-
-プロジェクトルートの `.env` ファイルから `terraform.tfvars` を自動生成します：
+### 1. 環境ディレクトリに移動
 
 ```bash
-# プロジェクトルートで実行
-python3 terraform/scripts/generate_tfvars.py
+cd deploy/terraform/stg  # ステージング環境の場合
 ```
 
-または手動で `terraform.tfvars` を作成：
+### 2. terraform.tfvarsを作成
+
+`terraform.tfvars.example` をコピーして編集：
 
 ```bash
-cp terraform/terraform.tfvars.example terraform/terraform.tfvars
-# エディタで編集
+cp terraform.tfvars.example terraform.tfvars
+# エディタで必要な値を設定
 ```
 
-### 2. Terraform初期化
+### 3. Terraform初期化
 
 ```bash
-cd terraform
 terraform init
 ```
 
-### 3. プラン確認
+### 4. プラン確認
 
 ```bash
 terraform plan
 ```
 
-### 4. 適用
+### 5. 適用
 
 ```bash
 terraform apply
@@ -82,10 +88,11 @@ terraform apply
 
 ## 📋 作成されるパラメータ一覧
 
-### App Service (19個)
+### App Service (22個)
 - `SECRET_KEY_FOR_SESSION_MIDDLEWARE` (SecureString)
 - `GOOGLE_CLIENT_ID` (SecureString)
 - `GOOGLE_CLIENT_SECRET` (SecureString)
+- `GOOGLE_AUTH_REDIRECT_URL` (String)
 - `DATABASE_URL` (SecureString)
 - `DATABASE_URL_SYNC` (SecureString)
 - `OTEL_EXPORTER_OTLP_ENDPOINT` (String)
@@ -97,21 +104,22 @@ terraform apply
 - `OTEL_EXPORTER_OTLP_PROTOCOL` (String)
 - `SENTRY_DSN` (SecureString)
 - `AWS_REGION` (String)
-- `AWS_ACCESS_KEY_ID` (SecureString)
-- `AWS_SECRET_ACCESS_KEY` (SecureString)
-- `AWS_ENDPOINT_URL` (String)
 - `SQS_QUEUE_NAME` (String)
 - `SQS_DLQ_NAME` (String)
+- `SQS_QUEUE_URL` (String)
+- `SQS_DLQ_URL` (String)
+- `REDIS_HOST` (String)
+- `REDIS_PORT` (String)
+- `REDIS_USE_TLS` (String)
 
-### Worker Service (8個)
+### Worker Service (7個)
 - `DATABASE_URL` (SecureString)
 - `DATABASE_URL_SYNC` (SecureString)
 - `AWS_REGION` (String)
-- `AWS_ACCESS_KEY_ID` (SecureString)
-- `AWS_SECRET_ACCESS_KEY` (SecureString)
-- `AWS_ENDPOINT_URL` (String)
 - `SQS_QUEUE_NAME` (String)
 - `SQS_DLQ_NAME` (String)
+- `SQS_QUEUE_URL` (String)
+- `SQS_DLQ_URL` (String)
 
 ### OTEL Collector (2個)
 - `LOKI_HOST` (String)
@@ -124,7 +132,7 @@ terraform apply
 `terraform.tfvars` で `environment` を変更：
 
 ```hcl
-environment = "prod"  # dev, staging, prod など
+environment = "prd"  # stg, prd など
 ```
 
 ### プロジェクト名を変更する場合
@@ -135,12 +143,27 @@ environment = "prod"  # dev, staging, prod など
 project_name = "your-app-name"
 ```
 
+## 🏗️ バックエンド構成
+
+Terraform の状態ファイルは S3 バケットで管理されます：
+
+```hcl
+backend "s3" {
+  bucket = "771623671665-stg-test-terraform-state"
+  key    = "terraform.tfstate"
+  region = "ap-northeast-1"
+}
+```
+
+初回実行前に、S3バケットが作成されていることを確認してください。
+
 ## 🔄 値の更新
 
 Terraformで管理するパラメータの値を更新する場合：
 
-1. `terraform.tfvars` を編集
-2. `terraform apply` を実行
+1. 該当環境の `terraform.tfvars` を編集
+2. `terraform plan` で変更内容を確認
+3. `terraform apply` を実行
 
 値が変更されると、SSM Parameter Storeの値も更新されます。
 
@@ -149,6 +172,7 @@ Terraformで管理するパラメータの値を更新する場合：
 - `terraform.tfvars` は機密情報を含むため `.gitignore` で除外されています
 - AWS profileは `dev-setup-sample` を使用するように設定されています
 - 実際の環境では、適切なIAM権限が必要です
+- 各環境（stg, prd）ごとに異なる `terraform.tfvars` を設定してください
 
 ## 🔍 パラメータの確認
 
@@ -157,12 +181,12 @@ Terraformで管理するパラメータの値を更新する場合：
 ```bash
 # AWS CLIで確認
 aws ssm get-parameters-by-path \
-  --path "/test/dev/" \
+  --path "/myproject/stg/" \
   --recursive \
   --profile dev-setup-sample
 
 # Terraformの出力を確認
-terraform output ssm_parameters_created
+terraform output
 ```
 
 ## 🧹 クリーンアップ
