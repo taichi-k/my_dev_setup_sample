@@ -123,4 +123,4 @@ FastAPIInstrumentor.instrument_app(app)
 @app.get("/")
 async def root() -> dict:
     log.info("Root endpoint accessed", extra={"extra": {"service": "app", "event": "root_access"}})
-    return {"message": "Hello from FastAPI on Dev Container that updated automatically!"}
+    return {"message": "Hello from FastAPI on Dev Container!"}
