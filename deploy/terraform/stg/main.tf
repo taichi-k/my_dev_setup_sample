@@ -1,7 +1,6 @@
 
 provider "aws" {
-  profile = "dev-setup-sample"
-  region  = "ap-northeast-1"
+  region = "ap-northeast-1"
 }
 
 terraform {
