@@ -14,7 +14,7 @@ permissions:
 jobs:
   terraform-apply:
     runs-on: ubuntu-latest
-    environment: production  # GitHub 環境保護使うなら
+    environment: terraform-ci
 
     env:
       TF_WORK_DIR: deploy/terraform/stg

@@ -15,6 +15,7 @@ permissions:
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
+    environment: terraform-ci
 
     env:
       TF_WORK_DIR: deploy/terraform/stg
