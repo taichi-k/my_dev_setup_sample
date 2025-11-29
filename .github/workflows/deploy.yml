@@ -45,19 +45,19 @@ jobs:
 
           IMAGE_URI_APP=${ECR_REGISTRY}/${ECR_REPOSITORY_APP}:${IMAGE_TAG}
           echo "Building image: ${IMAGE_URI_APP}"
-          docker build -t "${IMAGE_URI_APP}" .
+          docker build -f app.Dockerfile -t "${IMAGE_URI_APP}" .
           echo "Pushing image..."
           docker push "${IMAGE_URI_APP}"
 
           IMAGE_URI_OTEL_COLLECTOR=${ECR_REGISTRY}/${ECR_REPOSITORY_OTEL_COLLECTOR}:${IMAGE_TAG}
           echo "Building image: ${IMAGE_URI_OTEL_COLLECTOR}"
-          docker build -t "${IMAGE_URI_OTEL_COLLECTOR}" .
+          docker build -f otelcollector.Dockerfile -t "${IMAGE_URI_OTEL_COLLECTOR}" .
           echo "Pushing image..."
           docker push "${IMAGE_URI_OTEL_COLLECTOR}"
 
           IMAGE_URI_WORKER=${ECR_REGISTRY}/${ECR_REPOSITORY_WORKER}:${IMAGE_TAG}
           echo "Building image: ${IMAGE_URI_WORKER}"
-          docker build -t "${IMAGE_URI_WORKER}" .
+          docker build -f worker.Dockerfile -t "${IMAGE_URI_WORKER}" .
           echo "Pushing image..."
           docker push "${IMAGE_URI_WORKER}"
         shell: bash
