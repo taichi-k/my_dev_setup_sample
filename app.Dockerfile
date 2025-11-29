@@ -9,14 +9,15 @@ RUN apt-get update \
 RUN curl -LsSf https://astral.sh/uv/install.sh \
   | env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh
 
-RUN which uv && uv --version
-
 WORKDIR /workspace
 
+# 依存関係のインストール（キャッシュ効率化）
 COPY pyproject.toml uv.lock* ./
-
 RUN uv sync --group dev
 
-COPY . .
+# アプリケーションコードのコピー（必要なものだけ）
+COPY alembic.ini ./
+COPY src/ ./src/
+COPY alembic/ ./alembic/
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--app-dir", "src", "--reload", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

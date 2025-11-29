@@ -1,12 +1,45 @@
+# Python
 .venv
-__pycache__
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# macOS
 .DS_Store
 .AppleDouble
 .LSOverride
 Icon
 ._*
-*.pyc
-.git
+
+# Git
+.git/
 .gitignore
+.gitattributes
+
+# Environment
 .env
 .env.*
+
+# Development
+.vscode/
+.idea/
+
+# Database
+pgdata/
+
+# Infrastructure & Deployment
+deploy/
+infra/
+trash/
+*.Dockerfile
+docker-compose*.yml
+
+# Documentation
+README.md
+
+# Config files not needed in container
+taskfile.yml
