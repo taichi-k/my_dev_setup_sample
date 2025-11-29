@@ -1,19 +1,16 @@
 variable "environment" {
-  description = "Environment name (dev, staging, prod)"
+  description = "Environment name (dev, stg, prd)"
   type        = string
-  default     = "dev"
 }
 
 variable "project_name" {
   description = "Project name for parameter path prefix"
   type        = string
-  default     = "test"
 }
 
 variable "aws_region" {
   description = "AWS region for provider"
   type        = string
-  default     = "ap-northeast-1"
 }
 
 # ========================================
