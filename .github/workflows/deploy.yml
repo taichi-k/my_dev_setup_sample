@@ -101,7 +101,8 @@ jobs:
                  proxyConfiguration,
                  inferenceAccelerators,
                  ephemeralStorage
-               }')
+               } | with_entries(select(.value != null))
+               ')
 
           # 新しいタスク定義を登録
           NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
@@ -148,7 +149,7 @@ jobs:
                  proxyConfiguration,
                  inferenceAccelerators,
                  ephemeralStorage
-               }')
+               } | with_entries(select(.value != null))
 
           NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json "$NEW_TASK_DEF" \
