@@ -1,9 +1,17 @@
 # ========================================
+# Local Variables
+# ========================================
+
+locals {
+  parameter_prefix = "/${var.project_name}/${var.environment}"
+}
+
+# ========================================
 # App Service Parameters
 # ========================================
 
 resource "aws_ssm_parameter" "app_secret_key_for_session_middleware" {
-  name  = "/${var.project_name}/${var.environment}/app/SECRET_KEY_FOR_SESSION_MIDDLEWARE"
+  name  = "${local.parameter_prefix}/app/SECRET_KEY_FOR_SESSION_MIDDLEWARE"
   type  = "SecureString"
   value = var.app_secret_key_for_session_middleware
 
@@ -15,7 +23,7 @@ resource "aws_ssm_parameter" "app_secret_key_for_session_middleware" {
 }
 
 resource "aws_ssm_parameter" "app_google_client_id" {
-  name  = "/${var.project_name}/${var.environment}/app/GOOGLE_CLIENT_ID"
+  name  = "${local.parameter_prefix}/app/GOOGLE_CLIENT_ID"
   type  = "SecureString"
   value = var.app_google_client_id
 
@@ -27,7 +35,7 @@ resource "aws_ssm_parameter" "app_google_client_id" {
 }
 
 resource "aws_ssm_parameter" "app_google_client_secret" {
-  name  = "/${var.project_name}/${var.environment}/app/GOOGLE_CLIENT_SECRET"
+  name  = "${local.parameter_prefix}/app/GOOGLE_CLIENT_SECRET"
   type  = "SecureString"
   value = var.app_google_client_secret
 
@@ -39,7 +47,7 @@ resource "aws_ssm_parameter" "app_google_client_secret" {
 }
 
 resource "aws_ssm_parameter" "app_google_auth_redirect_url" {
-  name  = "/${var.project_name}/${var.environment}/app/GOOGLE_AUTH_REDIRECT_URL"
+  name  = "${local.parameter_prefix}/app/GOOGLE_AUTH_REDIRECT_URL"
   type  = "String"
   value = var.app_google_auth_redirect_url
 
@@ -51,7 +59,7 @@ resource "aws_ssm_parameter" "app_google_auth_redirect_url" {
 }
 
 resource "aws_ssm_parameter" "app_database_url" {
-  name  = "/${var.project_name}/${var.environment}/app/DATABASE_URL"
+  name  = "${local.parameter_prefix}/app/DATABASE_URL"
   type  = "SecureString"
   value = var.app_database_url
 
@@ -63,7 +71,7 @@ resource "aws_ssm_parameter" "app_database_url" {
 }
 
 resource "aws_ssm_parameter" "app_database_url_sync" {
-  name  = "/${var.project_name}/${var.environment}/app/DATABASE_URL_SYNC"
+  name  = "${local.parameter_prefix}/app/DATABASE_URL_SYNC"
   type  = "SecureString"
   value = var.app_database_url_sync
 
@@ -75,7 +83,7 @@ resource "aws_ssm_parameter" "app_database_url_sync" {
 }
 
 resource "aws_ssm_parameter" "app_otel_exporter_otlp_endpoint" {
-  name  = "/${var.project_name}/${var.environment}/app/OTEL_EXPORTER_OTLP_ENDPOINT"
+  name  = "${local.parameter_prefix}/app/OTEL_EXPORTER_OTLP_ENDPOINT"
   type  = "String"
   value = var.app_otel_exporter_otlp_endpoint
 
@@ -87,7 +95,7 @@ resource "aws_ssm_parameter" "app_otel_exporter_otlp_endpoint" {
 }
 
 resource "aws_ssm_parameter" "app_otel_service_name" {
-  name  = "/${var.project_name}/${var.environment}/app/OTEL_SERVICE_NAME"
+  name  = "${local.parameter_prefix}/app/OTEL_SERVICE_NAME"
   type  = "String"
   value = var.app_otel_service_name
 
@@ -99,7 +107,7 @@ resource "aws_ssm_parameter" "app_otel_service_name" {
 }
 
 resource "aws_ssm_parameter" "app_otel_service_version" {
-  name  = "/${var.project_name}/${var.environment}/app/OTEL_SERVICE_VERSION"
+  name  = "${local.parameter_prefix}/app/OTEL_SERVICE_VERSION"
   type  = "String"
   value = var.app_otel_service_version
 
@@ -111,7 +119,7 @@ resource "aws_ssm_parameter" "app_otel_service_version" {
 }
 
 resource "aws_ssm_parameter" "app_otel_service_namespace" {
-  name  = "/${var.project_name}/${var.environment}/app/OTEL_SERVICE_NAMESPACE"
+  name  = "${local.parameter_prefix}/app/OTEL_SERVICE_NAMESPACE"
   type  = "String"
   value = var.app_otel_service_namespace
 
@@ -123,7 +131,7 @@ resource "aws_ssm_parameter" "app_otel_service_namespace" {
 }
 
 resource "aws_ssm_parameter" "app_otel_deployment_environment" {
-  name  = "/${var.project_name}/${var.environment}/app/OTEL_DEPLOYMENT_ENVIRONMENT"
+  name  = "${local.parameter_prefix}/app/OTEL_DEPLOYMENT_ENVIRONMENT"
   type  = "String"
   value = var.app_otel_deployment_environment
 
@@ -135,7 +143,7 @@ resource "aws_ssm_parameter" "app_otel_deployment_environment" {
 }
 
 resource "aws_ssm_parameter" "app_otel_logs_exporter" {
-  name  = "/${var.project_name}/${var.environment}/app/OTEL_LOGS_EXPORTER"
+  name  = "${local.parameter_prefix}/app/OTEL_LOGS_EXPORTER"
   type  = "String"
   value = var.app_otel_logs_exporter
 
@@ -147,7 +155,7 @@ resource "aws_ssm_parameter" "app_otel_logs_exporter" {
 }
 
 resource "aws_ssm_parameter" "app_otel_exporter_otlp_protocol" {
-  name  = "/${var.project_name}/${var.environment}/app/OTEL_EXPORTER_OTLP_PROTOCOL"
+  name  = "${local.parameter_prefix}/app/OTEL_EXPORTER_OTLP_PROTOCOL"
   type  = "String"
   value = var.app_otel_exporter_otlp_protocol
 
@@ -159,7 +167,7 @@ resource "aws_ssm_parameter" "app_otel_exporter_otlp_protocol" {
 }
 
 resource "aws_ssm_parameter" "app_sentry_dsn" {
-  name  = "/${var.project_name}/${var.environment}/app/SENTRY_DSN"
+  name  = "${local.parameter_prefix}/app/SENTRY_DSN"
   type  = "SecureString"
   value = var.app_sentry_dsn
 
@@ -171,7 +179,7 @@ resource "aws_ssm_parameter" "app_sentry_dsn" {
 }
 
 resource "aws_ssm_parameter" "app_aws_region" {
-  name  = "/${var.project_name}/${var.environment}/app/AWS_REGION"
+  name  = "${local.parameter_prefix}/app/AWS_REGION"
   type  = "String"
   value = var.app_aws_region
 
@@ -183,7 +191,7 @@ resource "aws_ssm_parameter" "app_aws_region" {
 }
 
 resource "aws_ssm_parameter" "app_sqs_queue_name" {
-  name  = "/${var.project_name}/${var.environment}/app/SQS_QUEUE_NAME"
+  name  = "${local.parameter_prefix}/app/SQS_QUEUE_NAME"
   type  = "String"
   value = var.app_sqs_queue_name
 
@@ -195,7 +203,7 @@ resource "aws_ssm_parameter" "app_sqs_queue_name" {
 }
 
 resource "aws_ssm_parameter" "app_sqs_dlq_name" {
-  name  = "/${var.project_name}/${var.environment}/app/SQS_DLQ_NAME"
+  name  = "${local.parameter_prefix}/app/SQS_DLQ_NAME"
   type  = "String"
   value = var.app_sqs_dlq_name
 
@@ -207,7 +215,7 @@ resource "aws_ssm_parameter" "app_sqs_dlq_name" {
 }
 
 resource "aws_ssm_parameter" "app_sqs_queue_url" {
-  name  = "/${var.project_name}/${var.environment}/app/SQS_QUEUE_URL"
+  name  = "${local.parameter_prefix}/app/SQS_QUEUE_URL"
   type  = "String"
   value = var.app_sqs_queue_url
 
@@ -219,7 +227,7 @@ resource "aws_ssm_parameter" "app_sqs_queue_url" {
 }
 
 resource "aws_ssm_parameter" "app_sqs_dlq_url" {
-  name  = "/${var.project_name}/${var.environment}/app/SQS_DLQ_URL"
+  name  = "${local.parameter_prefix}/app/SQS_DLQ_URL"
   type  = "String"
   value = var.app_sqs_dlq_url
 
@@ -231,7 +239,7 @@ resource "aws_ssm_parameter" "app_sqs_dlq_url" {
 }
 
 resource "aws_ssm_parameter" "app_redis_host" {
-  name  = "/${var.project_name}/${var.environment}/app/REDIS_HOST"
+  name  = "${local.parameter_prefix}/app/REDIS_HOST"
   type  = "String"
   value = var.app_redis_host
 
@@ -243,7 +251,7 @@ resource "aws_ssm_parameter" "app_redis_host" {
 }
 
 resource "aws_ssm_parameter" "app_redis_port" {
-  name  = "/${var.project_name}/${var.environment}/app/REDIS_PORT"
+  name  = "${local.parameter_prefix}/app/REDIS_PORT"
   type  = "String"
   value = var.app_redis_port
 
@@ -255,7 +263,7 @@ resource "aws_ssm_parameter" "app_redis_port" {
 }
 
 resource "aws_ssm_parameter" "app_redis_use_tls" {
-  name  = "/${var.project_name}/${var.environment}/app/REDIS_USE_TLS"
+  name  = "${local.parameter_prefix}/app/REDIS_USE_TLS"
   type  = "String"
   value = var.app_redis_use_tls
 
@@ -271,7 +279,7 @@ resource "aws_ssm_parameter" "app_redis_use_tls" {
 # ========================================
 
 resource "aws_ssm_parameter" "worker_database_url" {
-  name  = "/${var.project_name}/${var.environment}/worker/DATABASE_URL"
+  name  = "${local.parameter_prefix}/worker/DATABASE_URL"
   type  = "SecureString"
   value = var.worker_database_url
 
@@ -283,7 +291,7 @@ resource "aws_ssm_parameter" "worker_database_url" {
 }
 
 resource "aws_ssm_parameter" "worker_database_url_sync" {
-  name  = "/${var.project_name}/${var.environment}/worker/DATABASE_URL_SYNC"
+  name  = "${local.parameter_prefix}/worker/DATABASE_URL_SYNC"
   type  = "SecureString"
   value = var.worker_database_url_sync
 
@@ -295,7 +303,7 @@ resource "aws_ssm_parameter" "worker_database_url_sync" {
 }
 
 resource "aws_ssm_parameter" "worker_aws_region" {
-  name  = "/${var.project_name}/${var.environment}/worker/AWS_REGION"
+  name  = "${local.parameter_prefix}/worker/AWS_REGION"
   type  = "String"
   value = var.worker_aws_region
 
@@ -307,7 +315,7 @@ resource "aws_ssm_parameter" "worker_aws_region" {
 }
 
 resource "aws_ssm_parameter" "worker_sqs_queue_name" {
-  name  = "/${var.project_name}/${var.environment}/worker/SQS_QUEUE_NAME"
+  name  = "${local.parameter_prefix}/worker/SQS_QUEUE_NAME"
   type  = "String"
   value = var.worker_sqs_queue_name
 
@@ -319,7 +327,7 @@ resource "aws_ssm_parameter" "worker_sqs_queue_name" {
 }
 
 resource "aws_ssm_parameter" "worker_sqs_dlq_name" {
-  name  = "/${var.project_name}/${var.environment}/worker/SQS_DLQ_NAME"
+  name  = "${local.parameter_prefix}/worker/SQS_DLQ_NAME"
   type  = "String"
   value = var.worker_sqs_dlq_name
 
@@ -331,7 +339,7 @@ resource "aws_ssm_parameter" "worker_sqs_dlq_name" {
 }
 
 resource "aws_ssm_parameter" "worker_sqs_queue_url" {
-  name  = "/${var.project_name}/${var.environment}/worker/SQS_QUEUE_URL"
+  name  = "${local.parameter_prefix}/worker/SQS_QUEUE_URL"
   type  = "String"
   value = var.worker_sqs_queue_url
 
@@ -343,7 +351,7 @@ resource "aws_ssm_parameter" "worker_sqs_queue_url" {
 }
 
 resource "aws_ssm_parameter" "worker_sqs_dlq_url" {
-  name  = "/${var.project_name}/${var.environment}/worker/SQS_DLQ_URL"
+  name  = "${local.parameter_prefix}/worker/SQS_DLQ_URL"
   type  = "String"
   value = var.worker_sqs_dlq_url
 
@@ -359,7 +367,7 @@ resource "aws_ssm_parameter" "worker_sqs_dlq_url" {
 # ========================================
 
 resource "aws_ssm_parameter" "otel_collector_loki_host" {
-  name  = "/${var.project_name}/${var.environment}/otel-collector/LOKI_HOST"
+  name  = "${local.parameter_prefix}/otel-collector/LOKI_HOST"
   type  = "String"
   value = var.otel_collector_loki_host
 
@@ -371,7 +379,7 @@ resource "aws_ssm_parameter" "otel_collector_loki_host" {
 }
 
 resource "aws_ssm_parameter" "otel_collector_loki_port" {
-  name  = "/${var.project_name}/${var.environment}/otel-collector/LOKI_PORT"
+  name  = "${local.parameter_prefix}/otel-collector/LOKI_PORT"
   type  = "String"
   value = var.otel_collector_loki_port
 
