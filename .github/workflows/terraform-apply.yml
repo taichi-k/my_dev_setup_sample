@@ -18,6 +18,14 @@ jobs:
 
     env:
       TF_WORK_DIR: deploy/terraform/stg
+      TF_VAR_app_database_url: ${{ secrets.STG_DATABASE_URL }}
+      TF_VAR_app_database_url_sync: ${{ secrets.STG_DATABASE_URL_SYNC }}
+      TF_VAR_worker_database_url: ${{ secrets.STG_DATABASE_URL }}
+      TF_VAR_worker_database_url_sync: ${{ secrets.STG_DATABASE_URL_SYNC }}
+      TF_VAR_app_google_client_id: ${{ secrets.TF_VAR_APP_GOOGLE_CLIENT_ID }}
+      TF_VAR_app_google_client_secret: ${{ secrets.TF_VAR_APP_GOOGLE_CLIENT_SECRET }}
+      TF_VAR_app_secret_key_for_session_middleware: ${{ secrets.TF_VAR_APP_SECRET_KEY_FOR_SESSION_MIDDLEWARE }}
+      TF_VAR_app_sentry_dsn: ${{ secrets.TF_VAR_APP_SENTRY_DSN }}
 
     steps:
       - name: Checkout
